@@ -1,0 +1,35 @@
+{
+  "name": "magnum/magnum",
+  "type": "library",
+  "description": "A wrapper around Slim, and Symfony Console",
+  "keywords": [
+    "container",
+    "proxy",
+    "console",
+  ],
+  "homepage": "https://github.com/magnumphp/magnum",
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Magnum Contributors",
+      "homepage": "https://github.com/magnumphp/magnum/contributors"
+    }
+  ],
+  "autoload" : {
+    "psr-4": {
+      "Magnum\\" : "src"
+    }
+  },
+  "require": {
+    "slim/slim": "4.x-dev",
+    "psr/http-message": "^1.0",
+    "dlundgren/pipeware": "^1.0",
+    "middlewares/utils": "^1.0",
+    "symfony/console": "^4.1",
+    "josegonzalez/dotenv": "^3.2"
+  },
+  "require-dev": {
+    "league/container": "^2.4",
+    "aura/di": "^3.4"
+  }
+}
