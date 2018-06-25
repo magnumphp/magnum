@@ -10,4 +10,10 @@ $options = [
 ];
 
 $container = \Magnum\Container\Adapter\AuraDi::container($rootPath, $options);
-$container->get(\Magnum\Console\Application::class)->run();
+$app = $container->get(\Magnum\Console\Application::class);
+
+$app->beginCommand('mod:test')
+	->setDescription("Does a test")
+	->end();
+
+$app->run();

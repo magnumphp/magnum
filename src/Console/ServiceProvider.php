@@ -25,7 +25,7 @@ class ServiceProvider
 	public function services()
 	{
 		return [
-			self::APP_COMMANDS_KEY => 'ack',
+			self::APP_COMMANDS_KEY => [],
 			Application::class => [$this, 'app']
 		];
 	}
@@ -41,8 +41,10 @@ class ServiceProvider
 					$container
 				);
 
-				foreach ($container->get(self::APP_COMMANDS_KEY) as $key) {
-					$app->add($container->get($key));
+				if ($container->has(self::APP_COMMANDS_KEY)) {
+					foreach ($container->get(self::APP_COMMANDS_KEY) as $key) {
+						$app->add($container->get($key));
+					}
 				}
 
 				return $app;
