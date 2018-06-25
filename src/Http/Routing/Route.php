@@ -16,8 +16,6 @@ use Slim\Http\Response;
 /**
  * Wraps the Slim Route to make it PSR-15 compatible
  *
- * @TODO    Look at making a Pipeware Factory so we aren't instantiating the Stack on it's own...
- *
  * @package Magnum\Http\Route
  */
 class Route
