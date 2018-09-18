@@ -27,7 +27,8 @@
     "middlewares/utils": "^1.0 | ^2.1",
     "symfony/console": "^4.1",
     "josegonzalez/dotenv": "^3.2",
-    "dlundgren/phrender": "~0.1"
+    "dlundgren/phrender": "~0.1",
+    "jeremeamia/xstatic": "~1.0"
   },
   "require-dev": {
     "league/container": "^2.4",
