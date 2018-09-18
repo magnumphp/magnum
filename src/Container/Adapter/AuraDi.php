@@ -22,10 +22,12 @@ class AuraDi
 			new InjectionFactory($resolver)
 		);
 		$container->set(Resolver::class, $resolver);
-		$self = new self($rootPath, $options);
+
+		$container = new AuraContainer($container);
+		$self      = new self($rootPath, $options);
 		$self->register($container);
 
-		return new AuraContainer($container);
+		return $container;
 	}
 
 	protected function push($container, $key, $value)

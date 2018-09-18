@@ -16,9 +16,35 @@ class AuraContainer
 {
 	protected $container;
 
+	protected $data;
+
+	/**
+	 * @var \Aura\Di\Resolver\Resolver
+	 */
+	protected $resolver;
+
 	public function __construct(Container $container)
 	{
 		$this->container = $container;
+		$this->resolver  = $container->getInjectionFactory()->getResolver();
+	}
+
+	public function set($key, $value)
+	{
+		$this->loadValues();
+		if (is_array($value) || is_string($value)) {
+			$this->resolver->values[$key] = $value;
+		}
+		else {
+			$this->container->set($key, $value);
+		}
+
+		return $this;
+	}
+
+	public function &__get($key)
+	{
+		return $this->resolver->__get($key);
 	}
 
 	public function get($id)
@@ -36,11 +62,24 @@ class AuraContainer
 
 	public function has($id)
 	{
+		$this->loadValues();
 		if ($this->container->has($id)) {
 			return true;
 		}
 
-		return isset($this->container->values[$id]);
+		return isset($this->data[$id]);
+	}
+
+	public function reload()
+	{
+		$this->loadValues(true);
+	}
+
+	protected function loadValues($reload = false)
+	{
+		if ($reload || !$this->data) {
+			$this->data = $this->resolver->__get('values');
+		}
 	}
 
 	/**

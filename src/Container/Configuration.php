@@ -42,6 +42,11 @@ class Configuration
 		);
 	}
 
+	public function all()
+	{
+		return $this->data;
+	}
+
 	public function get($id)
 	{
 		if (!array_key_exists($id, $this->data)) {
