@@ -2,7 +2,7 @@
 
 namespace Magnum\Http\Middleware;
 
-use Interop\Http\Factory\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Pipeware\Pipeline\Basic;
 use Pipeware\Pipeline\Containerized;
 use Pipeware\Pipeline\Pipeline;
@@ -12,7 +12,14 @@ use Psr\Container\ContainerInterface;
 
 class PipewareFactory
 {
+	/**
+	 * @var ContainerInterface
+	 */
 	private $container;
+
+	/**
+	 * @var ResponseFactoryInterface
+	 */
 	private $responseFactory;
 
 	public function __construct(ContainerInterface $container, ResponseFactoryInterface $responseFactory)

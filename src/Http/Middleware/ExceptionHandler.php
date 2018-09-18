@@ -11,9 +11,20 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class ErrorHandler
+/**
+ * This class is here to handle any exceptions that bubble up from the system itself.
+ *
+ * ExceptionHandler should be used to render any 404's or other views that may want to be rendered
+ *
+ * @package Magnum\Http\Middleware
+ */
+class ExceptionHandler
 	implements MiddlewareInterface
 {
+	use IsMiddleware;
+
+	protected $sendExceptionMessage = false;
+
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		try {
@@ -33,12 +44,12 @@ class ErrorHandler
 			$this->logger->error($e);
 		}
 
-		print_r($e->getTraceAsString());
-		die($e->getMessage());
-		die(get_class($e));
+		$response = $this->responseFactory->createResponse(500, "There was an error processing your request");
 
-		$headers = ['x-magnum-error' => $e->getMessage()];
-		return new Response(500, new Headers($headers));
+		if ($this->sendExceptionMessage) {
+			$response = $response->withHeader('x-magnum-error', $e->getMessage());
+		}
+		return $response;
 	}
 
 }

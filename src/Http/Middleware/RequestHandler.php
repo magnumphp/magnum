@@ -2,7 +2,7 @@
 
 namespace Magnum\Http\Middleware;
 
-use Interop\Http\Factory\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -59,6 +59,10 @@ class RequestHandler
 		$route->finalize();
 
 		$middleware   = $route->getMiddleware();
+		if (empty($middleware)) {
+			return $action->handle($request);
+		}
+
 		$middleware[] = new ActionHandler($action);
 
 		return $this->pipewareFactory->newContainerInstance($middleware)->handle($request);

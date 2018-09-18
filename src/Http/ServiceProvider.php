@@ -3,19 +3,19 @@
 namespace Magnum\Http;
 
 use Aura\Di\Container;
-use Interop\Http\Factory\ResponseFactoryInterface;
-use Magnum\Http\Middleware\ErrorHandler;
+use Magnum\Http\Middleware\ExceptionHandler;
 use Magnum\Http\Middleware\PipewareFactory;
 use Magnum\Http\Middleware\RequestHandler;
 use Magnum\Http\Middleware\Responder;
 use Magnum\Http\Middleware\Routing;
 use Magnum\Http\Routing\Router;
-use Middlewares\Utils\Factory\ResponseFactory;
+use Middlewares\Utils\Factory;
 use Pipeware\Pipeline\Containerized;
 use Pipeware\Processor;
 use Pipeware\Stack;
 use Psr\Container\ContainerInterface;
 use Psr\Http\Message\RequestInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Slim\Http\Request;
 
 /**
@@ -42,9 +42,9 @@ class ServiceProvider
 			// configuration
 			self::APP_MIDDLEWARE_KEY        => [
 				// define our base middleware
-				ErrorHandler::class,
-				Routing::class,
 				Responder::class,
+				ExceptionHandler::class,
+				Routing::class,
 				RequestHandler::class
 			],
 			self::REQUEST_GLOBALS_KEY       => $_SERVER,
@@ -59,7 +59,7 @@ class ServiceProvider
 			self::MIDDLEWARE_KEY            => [$this, 'middlewareStack'],
 
 			// middleware
-			ErrorHandler::class             => [$this, 'middlewareErrorHandler'],
+			ExceptionHandler::class         => [$this, 'middlewareErrorHandler'],
 			Routing::class                  => [$this, 'middlewareRouting'],
 			Responder::class                => [$this, 'middlewareResponder'],
 			RequestHandler::class           => [$this, 'middlewareRequestHandler']
@@ -100,7 +100,7 @@ class ServiceProvider
 
 	public function responseFactory()
 	{
-		return new ResponseFactory();
+		return Factory::getResponseFactory();
 	}
 
 	public function pipewareFactory(ContainerInterface $container)
@@ -128,7 +128,6 @@ class ServiceProvider
 
 	public function middlewareStack(ContainerInterface $container)
 	{
-
 		return new Stack(
 			$container->get(self::MIDDLEWARE_PIPELINE_KEY),
 			$container->get(self::MIDDLEWARE_PROCESSOR_KEY)
@@ -137,7 +136,7 @@ class ServiceProvider
 
 	public function middlewareErrorHandler()
 	{
-		return new ErrorHandler();
+		return new ExceptionHandler();
 	}
 
 	public function middlewareResponder()

@@ -15,23 +15,26 @@
       "homepage": "https://github.com/magnumphp/magnum/contributors"
     }
   ],
+  "config": {
+    "sort-packages": true
+  },
   "autoload" : {
     "psr-4": {
       "Magnum\\" : "src"
     }
   },
   "require": {
-    "slim/slim": "4.x-dev",
-    "psr/http-message": "^1.0",
-    "dlundgren/pipeware": "^1.0",
-    "middlewares/utils": "^1.0 | ^2.1",
-    "symfony/console": "^4.1",
-    "josegonzalez/dotenv": "^3.2",
     "dlundgren/phrender": "~0.1",
-    "jeremeamia/xstatic": "~1.0"
+    "dlundgren/pipeware": "^1.0",
+    "jeremeamia/xstatic": "~1.0",
+    "josegonzalez/dotenv": "^3.2",
+    "middlewares/utils": "^1.0 | ^2.1",
+    "psr/http-message": "^1.0",
+    "slim/slim": "4.x-dev",
+    "symfony/console": "^4.1"
   },
   "require-dev": {
-    "league/container": "^2.4",
-    "aura/di": "^3.4"
+    "aura/di": "^3.4",
+    "league/container": "^2.4"
   }
 }
