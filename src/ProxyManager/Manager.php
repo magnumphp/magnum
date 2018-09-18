@@ -77,7 +77,7 @@ class Manager
 	public function addProxy($alias, $proxyFqcn, $instance = null): self
 	{
 		if ($instance && method_exists($proxyFqcn, 'setInstance')) {
-			$proxyFqcn->setInstance($instance);
+			$proxyFqcn::setInstance($instance);
 		}
 
 		$this->aliasLoader->addAlias($alias, $proxyFqcn);
