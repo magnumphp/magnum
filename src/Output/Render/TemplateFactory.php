@@ -4,6 +4,7 @@ namespace Magnum\Output\Render;
 
 use Interop\Output\Template;
 use Phrender\Engine;
+use Phrender\Exception\TemplateNotFound;
 use Phrender\Template\Factory;
 use Psr\Container\ContainerInterface;
 
@@ -24,6 +25,27 @@ class TemplateFactory
 	{
 		$this->container = $container;
 		parent::__construct($paths, $ext);
+	}
+
+	public function has($template)
+	{
+		try {
+			$this->load($template);
+			return true;
+		}
+		catch (TemplateNotFound $e) {
+			// nothing to do
+		}
+		return false;
+	}
+
+	public function load($template)
+	{
+		if ($template{0} === '/' && file_exists($template)) {
+			return $this->create($template);
+		}
+
+		return parent::load($template);
 	}
 
 	public function create($file): Template
