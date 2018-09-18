@@ -19,6 +19,11 @@ class Responder
 			$response = $handler->handle($request);
 		}
 
+		return $this->send($response);
+	}
+
+	protected function send(ResponseInterface $response = null): ResponseInterface
+	{
 		if ($this->isEmptyResponse($response)) {
 			return $response->withoutHeader('Content-Type')->withoutHeader('Content-Length');
 		}
