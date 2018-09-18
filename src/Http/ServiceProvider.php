@@ -91,8 +91,9 @@ class ServiceProvider
 		return $this->instance(
 			RequestInterface::class,
 			function () use (&$container) {
-				$globals = $container->has(self::REQUEST_GLOBALS_KEY) ? $container->get(self::REQUEST_GLOBALS_KEY) : $_SERVER;
-
+				$globals = $container->has(self::REQUEST_GLOBALS_KEY)
+					? $container->get(self::REQUEST_GLOBALS_KEY)
+					: $_SERVER;
 				return Request::createFromGlobals($globals);
 			}
 		);

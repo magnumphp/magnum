@@ -12,11 +12,6 @@ class View
 	extends Template
 {
 	/**
-	 * @var Context
-	 */
-	protected $_context;
-
-	/**
 	 * @var Engine
 	 */
 	protected $engine;

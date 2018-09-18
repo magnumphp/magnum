@@ -20,7 +20,6 @@ class Lambda
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
 		return call_user_func($this->lambda, $request);
-
 	}
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler = null): ResponseInterface

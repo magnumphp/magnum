@@ -61,5 +61,4 @@ class TemplateFactory
 
 		return $this->engine;
 	}
-
 }

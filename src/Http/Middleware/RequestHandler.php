@@ -30,10 +30,16 @@ class RequestHandler
 	 */
 	private $pipewareFactory;
 
-	public function __construct(ContainerInterface $container,
-								ResponseFactoryInterface $responseFactory,
-								PipewareFactory $pipewareFactory)
-	{
+	/**
+	 * @var ResponseFactoryInterface
+	 */
+	private $responseFactory;
+
+	public function __construct(
+		ContainerInterface $container,
+		ResponseFactoryInterface $responseFactory,
+		PipewareFactory $pipewareFactory
+	) {
 		$this->container       = $container;
 		$this->responseFactory = $responseFactory;
 		$this->pipewareFactory = $pipewareFactory;
@@ -53,12 +59,12 @@ class RequestHandler
 		}
 
 		if (!($action instanceof RequestHandlerInterface)) {
-			throw new \RuntimeException("Invalid action handler, expecting " . RequestHandlerInterface::class . ', got ' . get_class($action));
+			throw new Exception\InvalidActionHandler(get_class($action));
 		}
 
 		$route->finalize();
 
-		$middleware   = $route->getMiddleware();
+		$middleware = $route->getMiddleware();
 		if (empty($middleware)) {
 			return $action->handle($request);
 		}

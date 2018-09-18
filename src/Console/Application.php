@@ -26,7 +26,7 @@ class Application
 	 */
 	protected $container;
 
-	public function __construct(string $name = 'UNKNOWN', string $version = 'UNKNOWN', ContainerInterface $container)
+	public function __construct(ContainerInterface $container, string $name = 'UNKNOWN', string $version = 'UNKNOWN')
 	{
 		$this->container = $container;
 		parent::__construct($name, $version);

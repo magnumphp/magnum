@@ -2,8 +2,9 @@
 
 namespace Magnum\Http\Routing;
 
-use Interop\Http\Factory\ResponseFactoryInterface;
+use Psr\Http\Message\ResponseFactoryInterface;
 use Magnum\Http\Middleware\PipewareFactory;
+use Magnum\ProxyManager\WrapsObject;
 use Pipeware\Pipeline\Containerized;
 use Pipeware\Processor;
 use Pipeware\Stack;
@@ -19,45 +20,23 @@ use Slim\Http\Response;
  * @package Magnum\Http\Route
  */
 class Route
-	implements RequestHandlerInterface
 {
-	private $route;
-	/**
-	 * @var ContainerInterface
-	 */
-	private $container;
+	use WrapsObject;
 
-	/**
-	 * @var PipewareFactory
-	 */
-	private $pipewareFactory;
+	protected $middleware = [];
 
-	public function __construct(ContainerInterface $container, PipewareFactory $pipewareFactory)
+	public function __construct($methods, string $pattern, $callable, $groups = [], int $identifier = 0)
 	{
-		$this->container       = $container;
-		$this->pipewareFactory = $pipewareFactory;
+		$this->instance = new \Slim\Route($methods, $pattern, $callable, $groups, $identifier);
 	}
 
-	public function handle(ServerRequestInterface $request): ResponseInterface
+	public function add($middleware)
 	{
-		/** @var \Slim\Route $route */
-		$route = $request->getAttribute('route');
+		$this->middleware[] = $middleware;
+	}
 
-		// we replace the __invoke with our own processing to be PSR-15 compliant
-		$callable = $route->getCallable();
-		if (is_string($callable)) {
-			$action = $this->container->get($callable);
-		}
-
-		if (!($action instanceof RequestHandlerInterface)) {
-			throw new \RuntimeException("Invalid action handler, expecting " . RequestHandlerInterface::class . ', got ' . get_class($action));
-		}
-
-		$route->finalize();
-
-		$middleware   = $route->getMiddleware();
-		$middleware[] = $action; // push the action to the end of the middleware
-
-		return $this->pipewareFactory->newContainerInstance($middleware)->handle($request);
+	public function getMiddleware()
+	{
+		return array_merge($this->middleware, $this->instance->getMiddleware());
 	}
 }

@@ -7,7 +7,7 @@ use Pimple\Container;
 class Pimple
 	extends AbstractAdapter
 {
-	public static function container($rootPath, array $options = [])
+	public static function container($rootPath, $options = [])
 	{
 		$container = new Container();
 
@@ -16,6 +16,7 @@ class Pimple
 
 		return $container;
 	}
+
 	protected function push($container, $key, $value)
 	{
 		if (is_callable($value)) {
@@ -27,5 +28,4 @@ class Pimple
 			$container[$key] = $value;
 		}
 	}
-
 }

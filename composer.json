@@ -35,6 +35,18 @@
   },
   "require-dev": {
     "aura/di": "^3.4",
-    "league/container": "^2.4"
+    "league/container": "^2.4",
+    "syberisle/coding-standards": "^2.0"
+  },
+  "scripts" : {
+    "test" : "phpunit",
+    "sniff": [
+      "phpcs --config-set installed_paths vendor/syberisle/coding-standards",
+      "phpcs --standard=SyberIsle src/"
+    ],
+    "format" : [
+      "phpcs --config-set installed_paths vendor/syberisle/coding-standards",
+      "phpcbf --standard=SyberIsle src/"
+    ]
   }
 }

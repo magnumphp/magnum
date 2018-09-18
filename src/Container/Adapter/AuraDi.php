@@ -17,7 +17,7 @@ class AuraDi
 	 */
 	public static function container($rootPath, $options = [], $resolver = null)
 	{
-		$resolver = $resolver ?: new ContextResolver(new Reflector());
+		$resolver  = $resolver ?: new ContextResolver(new Reflector());
 		$container = new Container(
 			new InjectionFactory($resolver)
 		);
@@ -31,14 +31,13 @@ class AuraDi
 	protected function push($container, $key, $value)
 	{
 		if (is_callable($value)) {
-			$container->set(
-				$key, function () use (&$container, &$value) {
+			$func = function () use (&$container, &$value) {
 				return call_user_func($value, $container);
-			});
+			};
+			$container->set($key, $func);
 		}
 		else {
 			$container->values[$key] = $value;
 		}
 	}
-
 }

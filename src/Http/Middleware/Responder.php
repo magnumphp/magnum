@@ -47,12 +47,14 @@ class Responder
 			// See https://github.com/slimphp/Slim/issues/1730
 
 			// Status
-			header(sprintf(
-					   'HTTP/%s %s %s',
-					   $response->getProtocolVersion(),
-					   $response->getStatusCode(),
-					   $response->getReasonPhrase()
-				   ));
+			header(
+				sprintf(
+					'HTTP/%s %s %s',
+					$response->getProtocolVersion(),
+					$response->getStatusCode(),
+					$response->getReasonPhrase()
+				)
+			);
 		}
 
 		// Body
@@ -61,12 +63,11 @@ class Responder
 			if ($body->isSeekable()) {
 				$body->rewind();
 			}
-			$chunkSize = $this->responseChunkSize;
-			$contentLength  = $response->getHeaderLine('Content-Length');
+			$chunkSize     = $this->responseChunkSize;
+			$contentLength = $response->getHeaderLine('Content-Length');
 			if (!$contentLength) {
 				$contentLength = $body->getSize();
 			}
-
 
 			if (isset($contentLength)) {
 				$amountToRead = $contentLength;
@@ -80,7 +81,8 @@ class Responder
 						break;
 					}
 				}
-			} else {
+			}
+			else {
 				while (!$body->eof()) {
 					echo $body->read($chunkSize);
 					if (connection_status() != CONNECTION_NORMAL) {

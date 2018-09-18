@@ -9,7 +9,8 @@ namespace Magnum\Console\Exception;
 
 use Magnum\Console\CommandHandler;
 
-class InvalidCommandHandler extends \RuntimeException
+class InvalidCommandHandler
+	extends \RuntimeException
 {
 	public function __construct($handler)
 	{

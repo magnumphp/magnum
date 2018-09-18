@@ -21,14 +21,13 @@ class League
 	protected function push($container, $key, $value)
 	{
 		if (is_callable($value)) {
-			$container->add(
-				$key, function () use (&$container, &$value) {
+			$func = function () use (&$container, &$value) {
 				return call_user_func($value, $container);
-			});
+			};
+			$container->add($key, $func);
 		}
 		else {
 			$container->add($key, $value);
 		}
 	}
-
 }

@@ -55,5 +55,4 @@ class Configuration
 	{
 		return array_key_exists($id, $this->data);
 	}
-
 }

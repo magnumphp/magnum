@@ -26,7 +26,7 @@ class ServiceProvider
 	{
 		return [
 			self::APP_COMMANDS_KEY => [],
-			Application::class => [$this, 'app']
+			Application::class     => [$this, 'app']
 		];
 	}
 
@@ -36,8 +36,8 @@ class ServiceProvider
 			Application::class,
 			function () use (&$container) {
 				$app = new Application(
-					$container->has(self::APP_NAME_KEY) ? $container->get(self::APP_NAME_KEY) : self::DEFAULT_APP_NAME,
-					$container->has(self::APP_VERSION_KEY) ? $container->get(self::APP_VERSION_KEY) : self::DEFAULT_APP_VERSION,
+					$this->fetchFromContainer($container, self::APP_NAME_KEY, self::DEFAULT_APP_NAME),
+					$this->fetchFromContainer($container, self::APP_VERSION_KEY, self::DEFAULT_APP_VERSION),
 					$container
 				);
 
@@ -50,6 +50,17 @@ class ServiceProvider
 				return $app;
 			}
 		);
+	}
+
+	/**
+	 * @param ContainerInterface $container
+	 * @param string             $key
+	 * @param string             $default
+	 * @return mixed Returns the value from the container
+	 */
+	protected function fetchFromContainer(ContainerInterface $container, $key, $default)
+	{
+		return $container->has($key) ? $container->get($key) : $default;
 	}
 
 	protected function instance($key, $callable)

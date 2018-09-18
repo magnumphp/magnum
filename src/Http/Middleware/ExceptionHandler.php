@@ -51,5 +51,4 @@ class ExceptionHandler
 		}
 		return $response;
 	}
-
 }
