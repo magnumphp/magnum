@@ -1,7 +1,7 @@
 {
   "name": "magnum/magnum",
   "type": "library",
-  "description": "A wrapper around Slim, and Symfony Console",
+  "description": "Extending various packages since 2018",
   "keywords": [
     "container",
     "proxy",
@@ -23,6 +23,11 @@
       "Magnum\\" : "src"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Magnum\\": "tests/unit"
+    }
+  },
   "require": {
     "dlundgren/phrender": "~0.1",
     "dlundgren/pipeware": "^2.0",
@@ -34,19 +39,33 @@
     "symfony/console": "^4.1"
   },
   "require-dev": {
-    "aura/di": "^3.4",
-    "league/container": "^2.4",
+    "mikey179/vfsStream": "^1.6",
+    "phploc/phploc": "^4.0",
+    "phpunit/phpunit": "^7.4",
+    "roave/security-advisories": "dev-master",
+    "sebastian/phpcpd": "^4.1",
+    "squizlabs/php_codesniffer": "^3.3",
     "syberisle/coding-standards": "^2.0"
   },
   "scripts" : {
-    "test" : "phpunit",
+    "test" : "@php vendor/bin/phpunit --colors=always",
+    "test-coverage" : "@php vendor/bin/phpunit --colors=always --coverage-html=tests/html-coverage",
     "sniff": [
-      "phpcs --config-set installed_paths vendor/syberisle/coding-standards",
-      "phpcs --standard=SyberIsle src/"
+      "@php vendor/bin/phpcs --config-set installed_paths vendor/syberisle/coding-standards",
+      "@php vendor/bin/phpcs --standard=SyberIsle src/"
     ],
     "format" : [
-      "phpcs --config-set installed_paths vendor/syberisle/coding-standards",
-      "phpcbf --standard=SyberIsle src/"
+      "@php vendor/bin/phpcs --config-set installed_paths vendor/syberisle/coding-standards",
+      "@php vendor/bin/phpcbf --standard=SyberIsle src/"
+    ],
+    "phpdoc" : [
+      "docker run --rm -v $(pwd):/data phpdoc/phpdoc"
+    ],
+    "phploc": [
+      "@php vendor/bin/phploc src tests > docs/phploc.txt"
+    ],
+    "phpcpd": [
+      "@php vendor/bin/phpcpd src tests"
     ]
   }
 }
