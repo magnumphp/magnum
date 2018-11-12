@@ -9,6 +9,7 @@ use Magnum\Container\Fixture\ConstructorB;
 use Magnum\Container\Fixture\ConstructorC;
 use Magnum\Container\Fixture\ConstructorD;
 use Magnum\Container\Fixture\ConstructorE;
+use Magnum\Container\Fixture\NonOptionalConstructor;
 use Magnum\Container\Stub\StubContainerConfig;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
@@ -18,7 +19,7 @@ use WoohooLabs\Zen\Container\Definition\SelfDefinition;
 
 /**
  * @copyright 2018, Woohoo Labs
- * @license MIT
+ * @license   MIT
  */
 class DependencyResolverTest
 	extends TestCase
@@ -78,6 +79,31 @@ class DependencyResolverTest
 																->resolveDependencies(),
 				ConstructorD::class           => ClassDefinition::singleton(ConstructorD::class)
 																->resolveDependencies(),
+			],
+			$dependencyResolver->getDefinitions()
+		);
+	}
+
+	public function testNonOptionConstructorParam()
+	{
+		$ep             = new ClassEntryPoint(NonOptionalConstructor::class, ['param' => 'test']);
+		$compilerConfig = new CompilerConfig(
+			'/tmp',
+			[
+				new StubContainerConfig([$ep], []),
+			]
+		);
+		$compilerConfig->enableAnnotations();
+		$dependencyResolver = new DependencyResolver($compilerConfig);
+		$dependencyResolver->resolveEntryPoints();
+
+		$this->assertEquals(
+			[
+				"Magnum\\Compiled\\Container" => new SelfDefinition("Magnum\\Compiled\\Container"),
+				ContainerInterface::class     => new ReferenceDefinition(ContainerInterface::class, "Magnum\\Compiled\\Container"),
+				NonOptionalConstructor::class => ClassDefinition::singleton(NonOptionalConstructor::class)
+																->addOptionalConstructorArgument("test")
+																->resolveDependencies()
 			],
 			$dependencyResolver->getDefinitions()
 		);

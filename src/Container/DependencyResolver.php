@@ -208,8 +208,19 @@ class DependencyResolver
 				}
 			}
 
-			$paramClass = $value ?? $this->typeHintReader->getParameterClass($param);
+			if ($value !== null && class_exists($value)) {
+				$paramClass = $value;
+			}
+			else {
+				$paramClass = $this->typeHintReader->getParameterClass($param);
+			}
+
 			if ($paramClass === null) {
+				if ($value !== null) {
+					$definition->addOptionalConstructorArgument($value ?? $param->getDefaultValue());
+					continue;
+				}
+
 				throw new ContainerException(
 					"Type declaration or '@param' PHPDoc comment for constructor parameter '{$paramName}' in '" .
 					"class '" . $definition->getClassName() . "' is missing or it is not a class!"
