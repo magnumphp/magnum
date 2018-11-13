@@ -57,6 +57,11 @@ class DependencyResolver
 	 */
 	protected $typeHintReader;
 
+	/**
+	 * @var array
+	 */
+	protected $deferred = [];
+
 	public function __construct(CompilerConfig $compilerConfig)
 	{
 		$definitionHints = [];
@@ -88,10 +93,26 @@ class DependencyResolver
 		foreach ($this->compilerConfig->getContainerConfigs() as $containerConfig) {
 			foreach ($containerConfig->createEntryPoints() as $entryPoint) {
 				foreach ($entryPoint->getClassNames() as $id) {
-					$this->resolve($id, $entryPoint);
+					try {
+						if (isset($this->definitions[$id])) {
+							unset($this->definitions[$id]);
+						}
+
+						$this->resolve($id, $entryPoint);
+						if (isset($this->deferred[$id])) {
+							unset($this->deferred[$id]);
+						}
+					}
+					catch (ContainerException $e) {
+						$this->deferred[$id] = $entryPoint;
+					}
 				}
 			}
 		}
+
+			foreach ($this->deferred as $id => $entryPoint) {
+				$this->resolve($id, $entryPoint);
+			}
 	}
 
 	/**
@@ -201,14 +222,16 @@ class DependencyResolver
 			$paramName = $param->getName();
 			$value     = $useEntryPoint ? $entryPoint->getConstructorParam($paramName, null) : null;
 
-			if ($param->isOptional()) {
-				if ($value === null || ($value !== null && !class_exists($value))) {
-					$definition->addOptionalConstructorArgument($value ?? $param->getDefaultValue());
-					continue;
-				}
+			if ($value instanceof CustomParam || ($value !== null && !is_object($value) && !class_exists($value))) {
+				$definition->addOptionalConstructorArgument($value);
+				continue;
+			}
+			elseif ($param->isOptional()) {
+				$definition->addOptionalConstructorArgument($param->getDefaultValue());
+				continue;
 			}
 
-			if ($value !== null && class_exists($value)) {
+			if ($value !== null && !is_object($value) && class_exists($value)) {
 				$paramClass = $value;
 			}
 			else {
