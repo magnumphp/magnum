@@ -36,7 +36,8 @@
     "middlewares/utils": "^1.0 | ^2.1",
     "psr/http-message": "^1.0",
     "slim/slim": "4.x-dev",
-    "symfony/console": "^4.1"
+    "symfony/console": "^4.1",
+    "woohoolabs/zen": "^2.4"
   },
   "require-dev": {
     "mikey179/vfsStream": "^1.6",
