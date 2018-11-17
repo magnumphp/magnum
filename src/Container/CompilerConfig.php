@@ -32,21 +32,21 @@ class CompilerConfig
 	/**
 	 * @var array List of providers
 	 */
-	protected $providers   = [];
+	protected $containerConfigs = [];
 
 	/**
 	 * @var array List of resolved providers
 	 */
 	protected $resolved;
 
-	public function __construct($cachePath, ...$providers)
+	public function __construct($cachePath, ...$containerConfigs)
 	{
 		$this->cacheFile = "{$cachePath}/container.php";
-		if (count($providers) === 1 && is_array($providers[0])) {
-			$this->providers = $providers[0];
+		if (count($containerConfigs) === 1 && is_array($containerConfigs[0])) {
+			$this->containerConfigs = $containerConfigs[0];
 		}
 		else {
-			$this->providers = $providers;
+			$this->containerConfigs = $containerConfigs;
 		}
 	}
 
@@ -61,12 +61,12 @@ class CompilerConfig
 	/**
 	 * Registers a Provider with the compiler config
 	 *
-	 * @param ContainerConfigInterface $provider
+	 * @param ContainerConfigInterface $containerConfig
 	 * @return CompilerConfig
 	 */
-	public function register(ContainerConfigInterface $provider): CompilerConfig
+	public function register(ContainerConfigInterface $containerConfig): CompilerConfig
 	{
-		$this->providers[] = $provider;
+		$this->containerConfigs[] = $containerConfig;
 
 		return $this;
 	}
@@ -177,12 +177,12 @@ class CompilerConfig
 	{
 		if (!isset($this->resolved)) {
 			$this->resolved = [];
-			foreach ($this->providers as $provider) {
-				if ($provider instanceof AbstractContainerConfig) {
-					$this->resolved[] = $provider;
+			foreach ($this->containerConfigs as $containerConfig) {
+				if ($containerConfig instanceof AbstractContainerConfig) {
+					$this->resolved[] = $containerConfig;
 				}
-				elseif (is_string($provider) && class_exists($provider)) {
-					$this->resolved[] = new $provider;
+				elseif (is_string($containerConfig) && class_exists($containerConfig)) {
+					$this->resolved[] = new $containerConfig;
 				}
 			}
 		}

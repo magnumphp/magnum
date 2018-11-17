@@ -3,15 +3,15 @@
 namespace Magnum\Container\Stub;
 
 use Magnum\Container\Fixture\ConstructorE;
-use Magnum\Container\Provider;
+use Magnum\Container\AbstractContainerConfig;
 
-class TestProvider
-	extends Provider
+class TestContainerConfig
+	extends AbstractContainerConfig
 {
 	public function __construct()
 	{
-		parent::__construct([
+		$this->entryPoints = [
 			ConstructorE::class
-		]);
+		];
 	}
 }

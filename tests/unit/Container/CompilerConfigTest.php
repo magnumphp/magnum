@@ -6,7 +6,7 @@ namespace Magnum\Container;
 use Magnum\Container\Config\ClassEntryPoint;
 use Magnum\Container\Fixture\ConstructorA;
 use Magnum\Container\Stub\StubContainerConfig;
-use Magnum\Container\Stub\TestProvider;
+use Magnum\Container\Stub\TestContainerConfig;
 use PHPUnit\Framework\TestCase;
 use org\bovigo\vfs\vfsStream;
 
@@ -129,11 +129,11 @@ class CompilerConfigTest
 
 	public function testGetContainerConfigsCreatesProvider()
 	{
-		$cc = new CompilerConfig('/tmp', TestProvider::class);
+		$cc = new CompilerConfig('/tmp', TestContainerConfig::class);
 
 		self::assertEquals(
 			[
-				new TestProvider()
+				new TestContainerConfig()
 			],
 			$cc->getContainerConfigs()
 		);
