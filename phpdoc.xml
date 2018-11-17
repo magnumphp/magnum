@@ -16,6 +16,5 @@
 	</transformations>
 	<files>
 		<directory>src</directory>
-		<directory>tests</directory>
 	</files>
 </phpdoc>

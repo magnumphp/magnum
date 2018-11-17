@@ -5,6 +5,7 @@ namespace Magnum\Container;
 
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
 use Magnum\Container\Config\EntryPoint;
+use Magnum\Container\Param\Param;
 use PhpDocReader\PhpDocReader;
 use Psr\Container\ContainerInterface;
 use ReflectionClass;
@@ -110,9 +111,9 @@ class DependencyResolver
 			}
 		}
 
-			foreach ($this->deferred as $id => $entryPoint) {
-				$this->resolve($id, $entryPoint);
-			}
+		foreach ($this->deferred as $id => $entryPoint) {
+			$this->resolve($id, $entryPoint);
+		}
 	}
 
 	/**
@@ -128,6 +129,8 @@ class DependencyResolver
 	 *
 	 * @param string              $id         The ID to resolve
 	 * @param EntryPointInterface $entryPoint The EntryPoint to use for custom definitions or constructor params
+	 * @throws ContainerException
+	 * @throws \PhpDocReader\AnnotationException
 	 */
 	private function resolve(string $id, ?EntryPointInterface $entryPoint = null): void
 	{
@@ -189,9 +192,28 @@ class DependencyResolver
 	{
 		$this->definitions[$id]->resolveDependencies();
 
-		if ($this->compilerConfig->useConstructorInjection()) {
+		if ($this->definitions[$id] instanceof ClassDefinition && $this->compilerConfig->useConstructorInjection()) {
 			$this->resolveConstructorArguments($this->definitions[$id], $entryPoint);
 		}
+
+		foreach ($this->definitions[$id]->getClassDependencies() as $name) {
+			$this->resolve($name, $entryPoint);
+		}
+	}
+
+	/**
+	 * Determines if the name exists as a class, Definition or DefinitionHint
+	 *
+	 * @param mixed $name
+	 * @return bool True when the class exists or is a definition/definitionhint. False otherwise.
+	 */
+	protected function hasHintDefinitionOrClassExists($name)
+	{
+		if (is_object($name) || $name === null) {
+			return false;
+		}
+
+		return class_exists($name) || isset($this->definitions[$name]) || isset($this->definitionHints[$name]);
 	}
 
 	/**
@@ -221,22 +243,20 @@ class DependencyResolver
 		foreach ($reflectionClass->getConstructor()->getParameters() as $param) {
 			$paramName = $param->getName();
 			$value     = $useEntryPoint ? $entryPoint->getConstructorParam($paramName, null) : null;
+			$isClass   = $this->hasHintDefinitionOrClassExists($value);
 
-			if ($value instanceof CustomParam || ($value !== null && !is_object($value) && !class_exists($value))) {
+			if ($value instanceof Param || ($value !== null && !$isClass)) {
 				$definition->addOptionalConstructorArgument($value);
 				continue;
 			}
-			elseif ($param->isOptional()) {
+			elseif ($param->isOptional() && !$isClass) {
 				$definition->addOptionalConstructorArgument($param->getDefaultValue());
 				continue;
 			}
 
-			if ($value !== null && !is_object($value) && class_exists($value)) {
-				$paramClass = $value;
-			}
-			else {
-				$paramClass = $this->typeHintReader->getParameterClass($param);
-			}
+			$paramClass = ($value !== null && !is_object($value) && class_exists($value))
+				? $value
+				: $this->typeHintReader->getParameterClass($param);
 
 			if ($paramClass === null) {
 				if ($value !== null) {

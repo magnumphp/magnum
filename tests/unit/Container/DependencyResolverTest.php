@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Magnum\Container;
 
 use Magnum\Container\Config\ClassEntryPoint;
+use Magnum\Container\Param\StringParam;
 use Magnum\Container\Fixture\ConstructorA;
 use Magnum\Container\Fixture\ConstructorB;
 use Magnum\Container\Fixture\ConstructorC;
@@ -103,6 +104,29 @@ class DependencyResolverTest
 				ContainerInterface::class     => new ReferenceDefinition(ContainerInterface::class, "Magnum\\Compiled\\Container"),
 				NonOptionalConstructor::class => ClassDefinition::singleton(NonOptionalConstructor::class)
 																->addOptionalConstructorArgument("test")
+																->resolveDependencies()
+			],
+			$dependencyResolver->getDefinitions()
+		);
+	}
+
+	public function testCustomParam()
+	{
+		$ep             = new ClassEntryPoint(NonOptionalConstructor::class, ['param' => new StringParam('test')]);
+		$compilerConfig = new CompilerConfig(
+			'/tmp',
+			[
+				new StubContainerConfig([$ep], []),
+			]
+		);
+		$dependencyResolver = new DependencyResolver($compilerConfig);
+		$dependencyResolver->resolveEntryPoints();
+		$this->assertEquals(
+			[
+				"Magnum\\Compiled\\Container" => new SelfDefinition("Magnum\\Compiled\\Container"),
+				ContainerInterface::class     => new ReferenceDefinition(ContainerInterface::class, "Magnum\\Compiled\\Container"),
+				NonOptionalConstructor::class => ClassDefinition::singleton(NonOptionalConstructor::class)
+																->addOptionalConstructorArgument(new StringParam("test"))
 																->resolveDependencies()
 			],
 			$dependencyResolver->getDefinitions()
