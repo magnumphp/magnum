@@ -192,12 +192,15 @@ class DependencyResolver
 	{
 		$this->definitions[$id]->resolveDependencies();
 
-		if ($this->definitions[$id] instanceof ClassDefinition && $this->compilerConfig->useConstructorInjection()) {
-			$this->resolveConstructorArguments($this->definitions[$id], $entryPoint);
+		if ($this->definitions[$id] instanceof ClassDefinition) {
+			if ($this->compilerConfig->useConstructorInjection()) {
+				$this->resolveConstructorArguments($this->definitions[$id], $entryPoint);
+			}
 		}
-
-		foreach ($this->definitions[$id]->getClassDependencies() as $name) {
-			$this->resolve($name, $entryPoint);
+		else {
+			foreach ($this->definitions[$id]->getClassDependencies() as $name) {
+				$this->resolve($name, $entryPoint);
+			}
 		}
 	}
 
