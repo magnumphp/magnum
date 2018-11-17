@@ -2,9 +2,8 @@
 
 namespace Magnum\Container\Config;
 
+use Magnum\Container\Definition\FactoryDefinition;
 use WoohooLabs\Zen\Config\Hint\DefinitionHint;
-use WoohooLabs\Zen\Config\Hint\DefinitionHintInterface;
-use WoohooLabs\Zen\Container\Definition\DefinitionInterface;
 
 /**
  * Hint for injecting a factory
