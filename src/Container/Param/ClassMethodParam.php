@@ -56,5 +56,4 @@ class ClassMethodParam
 
 		return "\$this->singletonEntries['{$id}'] ?? \$this->{$hash}()";
 	}
-
 }

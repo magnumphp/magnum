@@ -3,8 +3,8 @@ declare(strict_types=1);
 
 namespace Magnum\Container\Stub;
 
+use Magnum\Container\AbstractContainerConfig;
 use Magnum\Container\ProvidesContainerConfig;
-use WoohooLabs\Zen\Config\AbstractContainerConfig;
 
 class StubContainerConfig
 	extends AbstractContainerConfig

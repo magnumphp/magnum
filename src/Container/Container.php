@@ -20,7 +20,7 @@ class Container
 
 	public function __construct(CompilerConfig $config)
 	{
-		$this->config  = $config;
+		$this->config = $config;
 	}
 
 	/**
@@ -28,7 +28,7 @@ class Container
 	 *
 	 * @return ContainerInterface
 	 */
-	public function build(): ContainerInterface
+	public function build($debug = false): ContainerInterface
 	{
 		if ($this->config->useCompilation()) {
 			$this->config->isCompiled() || $this->config->saveCompiled($this->resolveContainer());

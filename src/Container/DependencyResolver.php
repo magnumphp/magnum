@@ -4,7 +4,11 @@ declare(strict_types=1);
 namespace Magnum\Container;
 
 use Doctrine\Common\Annotations\SimpleAnnotationReader;
+use Magnum\Container\Config\ContextDependentParamHint;
 use Magnum\Container\Config\EntryPoint;
+use Magnum\Container\Config\ParamHint;
+use Magnum\Container\Exception\MissingClass;
+use Magnum\Container\Exception\MissingParameter;
 use Magnum\Container\Param\Param;
 use PhpDocReader\PhpDocReader;
 use Psr\Container\ContainerInterface;
@@ -14,6 +18,7 @@ use WoohooLabs\Zen\Config\AbstractCompilerConfig;
 use WoohooLabs\Zen\Config\EntryPoint\EntryPointInterface;
 use WoohooLabs\Zen\Config\Hint\DefinitionHintInterface;
 use WoohooLabs\Zen\Container\Definition\ClassDefinition;
+use WoohooLabs\Zen\Container\Definition\ContextDependentDefinition;
 use WoohooLabs\Zen\Container\Definition\DefinitionInterface;
 use WoohooLabs\Zen\Container\Definition\ReferenceDefinition;
 use WoohooLabs\Zen\Container\Definition\SelfDefinition;
@@ -77,12 +82,10 @@ class DependencyResolver
 		}
 		$this->typeHintReader = new PhpDocReader();
 
+		$containerName     = $this->compilerConfig->getContainerFqcn();
 		$this->definitions = [
-			$this->compilerConfig->getContainerFqcn() => new SelfDefinition($this->compilerConfig->getContainerFqcn()),
-			ContainerInterface::class                 => new ReferenceDefinition(
-				ContainerInterface::class,
-				$this->compilerConfig->getContainerFqcn()
-			),
+			$containerName            => new SelfDefinition($containerName),
+			ContainerInterface::class => new ReferenceDefinition(ContainerInterface::class, $containerName),
 		];
 	}
 
@@ -94,6 +97,10 @@ class DependencyResolver
 		foreach ($this->compilerConfig->getContainerConfigs() as $containerConfig) {
 			foreach ($containerConfig->createEntryPoints() as $entryPoint) {
 				foreach ($entryPoint->getClassNames() as $id) {
+					if (!class_exists($id)) {
+						throw new MissingClass($id);
+					}
+
 					try {
 						if (isset($this->definitions[$id])) {
 							unset($this->definitions[$id]);
@@ -104,7 +111,7 @@ class DependencyResolver
 							unset($this->deferred[$id]);
 						}
 					}
-					catch (ContainerException $e) {
+					catch (MissingClass $e) {
 						$this->deferred[$id] = $entryPoint;
 					}
 				}
@@ -142,17 +149,17 @@ class DependencyResolver
 			return;
 		}
 
-		$isAutoloaded = false;
-		if ($entryPoint && ($this->compilerConfig->getAutoloadConfig()
-												 ->isGlobalAutoloadEnabled() || $entryPoint->isAutoloaded())) {
+		$isAutoloaded   = false;
+		$autoloadConfig = $this->compilerConfig->getAutoloadConfig();
+		if ($entryPoint && ($autoloadConfig->isGlobalAutoloadEnabled() || $entryPoint->isAutoloaded())) {
 			$isAutoloaded = true;
 		}
 
-		if (in_array($entryPoint, $this->compilerConfig->getAutoloadConfig()->getAlwaysAutoloadedClasses(), true)) {
+		if (in_array($entryPoint, $autoloadConfig->getAlwaysAutoloadedClasses(), true)) {
 			$isAutoloaded = false;
 		}
 
-		if (in_array($entryPoint, $this->compilerConfig->getAutoloadConfig()->getExcludedClasses(), true)) {
+		if (in_array($entryPoint, $autoloadConfig->getExcludedClasses(), true)) {
 			$isAutoloaded = false;
 		}
 
@@ -188,7 +195,7 @@ class DependencyResolver
 	 * @throws ContainerException
 	 * @throws \PhpDocReader\AnnotationException
 	 */
-	private function resolveDependencies(string $id, ?EntryPointInterface $entryPoint = null): void
+	protected function resolveDependencies(string $id, ?EntryPointInterface $entryPoint = null): void
 	{
 		$this->definitions[$id]->resolveDependencies();
 
@@ -205,21 +212,6 @@ class DependencyResolver
 	}
 
 	/**
-	 * Determines if the name exists as a class, Definition or DefinitionHint
-	 *
-	 * @param mixed $name
-	 * @return bool True when the class exists or is a definition/definitionhint. False otherwise.
-	 */
-	protected function hasHintDefinitionOrClassExists($name)
-	{
-		if (is_object($name) || $name === null) {
-			return false;
-		}
-
-		return class_exists($name) || isset($this->definitions[$name]) || isset($this->definitionHints[$name]);
-	}
-
-	/**
 	 * Resolves the constructor arguments for the definition
 	 *
 	 * @param ClassDefinition          $definition
@@ -227,61 +219,89 @@ class DependencyResolver
 	 * @throws ContainerException
 	 * @throws \PhpDocReader\AnnotationException
 	 */
-	private function resolveConstructorArguments(
+	protected function resolveConstructorArguments(
 		ClassDefinition $definition,
 		?EntryPointInterface $entryPoint = null
 	): void {
+		$className = $definition->getClassName();
 		try {
-			$reflectionClass = new ReflectionClass($definition->getClassName());
+			$reflectionClass = new ReflectionClass($className);
 		}
 		catch (ReflectionException $e) {
-			throw new ContainerException("Cannot inject class: " . $definition->getClassName());
+			throw new MissingClass($className);
 		}
 
 		if ($reflectionClass->getConstructor() === null) {
 			return;
 		}
 
-		$useEntryPoint = isset($entryPoint) && $entryPoint instanceof EntryPoint;
 		foreach ($reflectionClass->getConstructor()->getParameters() as $param) {
-			$paramName = $param->getName();
-			$value     = $useEntryPoint ? $entryPoint->getConstructorParam($paramName, null) : null;
-			$isClass   = $this->hasHintDefinitionOrClassExists($value);
-
-			if ($value instanceof Param || ($value !== null && !$isClass)) {
+			$value = $this->resolveValue($className, $entryPoint, $param);
+			if (is_string($value) && class_exists($value)) {
+				$definition->addRequiredConstructorArgument($value);
+				$this->resolve($value);
+			}
+			elseif ($value) {
+					$definition->addOptionalConstructorArgument($value);
+			}
+			elseif ($param->isOptional()) {
 				$definition->addOptionalConstructorArgument($value);
-				continue;
 			}
-			elseif ($param->isOptional() && !$isClass) {
-				$definition->addOptionalConstructorArgument($param->getDefaultValue());
-				continue;
+			else {
+				throw new MissingParameter($className, $param->getName());
 			}
+		}
+	}
 
-			$paramClass = ($value !== null && !is_object($value) && class_exists($value))
-				? $value
-				: $this->typeHintReader->getParameterClass($param);
+	/**
+	 * Resolves the hint value based on the class and param it's looking for
+	 *
+	 * @param                      $className
+	 * @param EntryPoint|null      $entryPoint
+	 * @param \ReflectionParameter $param
+	 * @return mixed
+	 * @throws MissingParameter
+	 * @throws \PhpDocReader\AnnotationException
+	 */
+	protected function resolveValue($className, ?EntryPoint $entryPoint = null, \ReflectionParameter $param)
+	{
+		$paramName = $param->getName();
+		$value = $entryPoint ? $entryPoint->getConstructorParam($paramName) : null;
+		if ($value) {
+			return $value;
+		}
 
-			if ($paramClass === null) {
-				if ($value !== null) {
-					$definition->addOptionalConstructorArgument($value ?? $param->getDefaultValue());
-					continue;
+		if (!isset($this->definitionHints[$key = "{$className}.{$paramName}"]) &&
+			!isset($this->definitionHints[$key = $paramName])
+		) {
+			if ($param->isOptional()) {
+				return $param->getDefaultValue();
+			}
+			else{
+				$paramType = $this->typeHintReader->getParameterClass($param);
+				if ($paramType) {
+					return $paramType;
 				}
 
-				throw new ContainerException(
-					"Type declaration or '@param' PHPDoc comment for constructor parameter '{$paramName}' in '" .
-					"class '" . $definition->getClassName() . "' is missing or it is not a class!"
-				);
+				throw new MissingParameter($className, $paramName);
 			}
-
-			$definition->addRequiredConstructorArgument($paramClass);
-			$this->resolve($paramClass);
 		}
+
+		$value = $this->definitionHints[$key];
+		if ($value instanceof ContextDependentParamHint) {
+			$value = $value->resolve($className);
+		}
+		elseif ($value instanceof ParamHint) {
+			$value = $value->param();
+		}
+
+		return $value;
 	}
 
 	/**
 	 * Sets up the annotation reader
 	 */
-	private function setAnnotationReader(): void
+	protected function setAnnotationReader(): void
 	{
 		$this->annotationReader = new SimpleAnnotationReader();
 		$this->annotationReader->addNamespace('WoohooLabs\Zen\Annotation');

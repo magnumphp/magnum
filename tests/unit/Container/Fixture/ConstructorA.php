@@ -17,5 +17,9 @@ class ConstructorA
 	 */
 	public function __construct(ConstructorB $b, $c, bool $d = true, string $e = null)
 	{
+		$this->b = $b;
+		$this->c = $c;
+		$this->d = $d;
+		$this->e = $e;
 	}
 }

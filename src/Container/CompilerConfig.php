@@ -3,7 +3,6 @@
 namespace Magnum\Container;
 
 use WoohooLabs\Zen\Config\AbstractCompilerConfig;
-use WoohooLabs\Zen\Config\AbstractContainerConfig;
 use WoohooLabs\Zen\Config\ContainerConfigInterface;
 
 /**
@@ -55,16 +54,16 @@ class CompilerConfig
 	 */
 	public function loadFromCache()
 	{
-		require_once $this->cacheFile;
+		require $this->cacheFile;
 	}
 
 	/**
 	 * Registers a Provider with the compiler config
 	 *
-	 * @param ContainerConfigInterface $containerConfig
+	 * @param ContainerConfigInterface|string $containerConfig
 	 * @return CompilerConfig
 	 */
-	public function register(ContainerConfigInterface $containerConfig): CompilerConfig
+	public function register($containerConfig): CompilerConfig
 	{
 		$this->containerConfigs[] = $containerConfig;
 
@@ -182,7 +181,7 @@ class CompilerConfig
 					$this->resolved[] = $containerConfig;
 				}
 				elseif (is_string($containerConfig) && class_exists($containerConfig)) {
-					$this->resolved[] = new $containerConfig;
+					$this->resolved[] = new $containerConfig($this);
 				}
 			}
 		}

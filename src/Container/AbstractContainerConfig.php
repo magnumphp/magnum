@@ -4,6 +4,8 @@ namespace Magnum\Container;
 
 use Magnum\Container\Config\ClassEntryPoint;
 use Magnum\Container\Config\FactoryHint;
+use Magnum\Container\Config\ParamHint;
+use Magnum\Container\Param\Param;
 use WoohooLabs\Zen\Config\ContainerConfigInterface;
 use WoohooLabs\Zen\Config\EntryPoint\EntryPointInterface;
 use WoohooLabs\Zen\Config\Hint\DefinitionHint;
@@ -74,6 +76,10 @@ abstract class AbstractContainerConfig
 
 				if (\is_array($definitionHint)) {
 					return new FactoryHint(...$definitionHint);
+				}
+
+				if ($definitionHint instanceof Param) {
+					return new ParamHint($definitionHint);
 				}
 
 				throw new ContainerException("A definition hint must be either a string or a DefinitionHint object");
