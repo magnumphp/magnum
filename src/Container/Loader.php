@@ -25,7 +25,7 @@ class Loader
 	/**
 	 * @var bool Whether or not the container is compiled
 	 */
-	protected $isCompiled     = false;
+	protected $isCompiled = false;
 
 	/**
 	 * @var bool Whether or not to compile the container
@@ -35,12 +35,17 @@ class Loader
 	/**
 	 * @var array List of the providers
 	 */
-	protected $providers      = [];
+	protected $providers = [];
 
 	/**
 	 * @var array List of parameters to inject
 	 */
 	protected $params = [];
+
+	/**
+	 * @var Builder
+	 */
+	protected $builder;
 
 	public function __construct($useCompilation = false, $cacheFile = null)
 	{
@@ -61,6 +66,20 @@ class Loader
 	public function isCompiled(): bool
 	{
 		return $this->isCompiled;
+	}
+
+	/**
+	 * Returns the Builder instance.
+	 *
+	 * @return Builder
+	 */
+	public function builder(): Builder
+	{
+		if (!$this->builder) {
+			$this->builder = new Builder();
+		}
+
+		return $this->builder;
 	}
 
 	/**
@@ -130,7 +149,7 @@ class Loader
 			return new \CompiledContainer;
 		}
 
-		$builder = new Builder();
+		$builder = $this->builder();
 		$builder->builder()->getParameterBag()->add($this->params);
 
 		foreach ($this->providers as $provider) {
