@@ -2,6 +2,7 @@
 
 namespace Magnum\Container;
 
+use Magnum\Container\Exception\InvalidProvider;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -36,6 +37,11 @@ class Loader
 	 */
 	protected $providers      = [];
 
+	/**
+	 * @var array List of parameters to inject
+	 */
+	protected $params = [];
+
 	public function __construct($useCompilation = false, $cacheFile = null)
 	{
 		$this->useCompilation = $useCompilation;
@@ -46,6 +52,18 @@ class Loader
 	}
 
 	/**
+	 * Returns whether or not the container is compiled.
+	 *
+	 * @NOTE This is a naive implementation that only checks if the cacheFile exists.
+	 *
+	 * @return bool
+	 */
+	public function isCompiled(): bool
+	{
+		return $this->isCompiled;
+	}
+
+	/**
 	 * Registers a service provider that will configure the container
 	 *
 	 * @param $provider
@@ -53,7 +71,48 @@ class Loader
 	 */
 	public function register($provider)
 	{
+		if (is_string($provider) && class_exists($provider)) {
+			$provider = new $provider;
+		}
+
+		if (!($provider instanceof Provider)) {
+			throw new InvalidProvider($provider);
+		}
+
 		$this->providers[] = $provider;
+
+		if (method_exists($provider, 'providers')) {
+			foreach ($provider->providers() as $subProvider) {
+				$this->register($subProvider);
+			}
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Sets a parameter
+	 *
+	 * @param $id
+	 * @param $value
+	 * @return $this
+	 */
+	public function param($id, $value)
+	{
+		$this->params[$id] = $value;
+
+		return $this;
+	}
+
+	/**
+	 * Merges the parameters in to the existing params
+	 *
+	 * @param $params
+	 * @return $this
+	 */
+	public function params($params)
+	{
+		$this->params = array_merge($this->params ?? [], $params);
 
 		return $this;
 	}
@@ -72,8 +131,9 @@ class Loader
 		}
 
 		$builder = new Builder();
+		$builder->builder()->getParameterBag()->add($this->params);
 
-		foreach ($this->resolveProviders() as $provider) {
+		foreach ($this->providers as $provider) {
 			$provider->register($builder);
 		}
 
@@ -82,24 +142,5 @@ class Loader
 		}
 
 		return $builder->container();
-	}
-
-	/**
-	 * Loads the providers in to the container
-	 */
-	protected function resolveProviders(): array
-	{
-		$providers  = [];
-		foreach ($this->providers as $provider) {
-			if (is_string($provider)) {
-				$provider = new $provider;
-			}
-
-			if ($provider instanceof Provider) {
-				$providers[] = $provider;
-			}
-		}
-
-		return $providers;
 	}
 }

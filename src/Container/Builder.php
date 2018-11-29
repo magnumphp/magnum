@@ -2,12 +2,14 @@
 
 namespace Magnum\Container;
 
+use mindplay\filereflection\ReflectionFile;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
+use Symfony\Component\Finder\Finder;
 
 /**
  * Builder for Symfony's Dependency Injection container
@@ -24,6 +26,11 @@ class Builder
 	 * @var ContainerBuilder
 	 */
 	protected $container;
+
+	/**
+	 * @var Finder
+	 */
+	protected $finder;
 
 	public function __construct()
 	{
@@ -165,5 +172,72 @@ class Builder
 		return $this->container
 			->setAlias($id, $target)
 			->setPublic(true);
+	}
+
+	/**
+	 * Sets a parameter
+	 *
+	 * @param $id
+	 * @param $value
+	 * @return $this
+	 */
+	public function param($id, $value)
+	{
+		$this->container->setParameter($id, $value);
+
+		return $this;
+	}
+
+	/**
+	 * Merges the parameters in to the existing params
+	 *
+	 * @param $params
+	 * @return $this
+	 */
+	public function params($params)
+	{
+		foreach ($params as $id => $value) {
+			$this->container->setParameter($id, $value);
+		}
+
+		return $this;
+	}
+
+	/**
+	 * Returns a list of all classes in the path.
+	 *
+	 * The classes must be contained in the *.php
+	 *
+	 * @param string|array $path The path(s) to search for *.php on
+	 * @return array
+	 */
+	public function findClassesInPath($path): array
+	{
+		$files = $this->resolveFinder()->files()->in($path)->name('*.php');
+		$classes = [];
+
+		foreach ($files as $file) {
+			$file = new ReflectionFile($file->getRealpath());
+			foreach ($file->getClasses() as $class) {
+				/** @var \ReflectionClass $class */
+				$classes[] = $class->getName();
+			}
+		}
+
+		return $classes;
+	}
+
+	/**
+	 * Resolves the finder
+	 *
+	 * @return Finder
+	 */
+	protected function resolveFinder(): Finder
+	{
+		if (!$this->finder) {
+			$this->finder = Finder::create();
+		}
+
+		return $this->finder;
 	}
 }

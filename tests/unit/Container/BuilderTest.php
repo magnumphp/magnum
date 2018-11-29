@@ -2,10 +2,15 @@
 
 namespace Magnum\Container;
 
+use Magnum\Container\Stub\BadConstructorC;
 use Magnum\Container\Stub\ConstructorA;
 use Magnum\Container\Stub\ConstructorB;
+use Magnum\Container\Stub\ConstructorC;
+use Magnum\Container\Stub\StubProvider;
+use Magnum\Container\Stub\StubProviderWithSubProvider;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class BuilderTest
@@ -96,5 +101,44 @@ class BuilderTest
 		self::assertInstanceOf(ConstructorA::class, $obj->a);
 	}
 
+	public function testFindsClassesInPath()
+	{
+		$builder = new Builder();
+		self::assertEquals(
+			[
+				BadConstructorC::class,
+				ConstructorA::class,
+				ConstructorB::class,
+				ConstructorC::class,
+				StubProvider::class,
+				StubProviderWithSubProvider::class
+			],
+			$builder->findClassesInPath(__DIR__ . '/Stub')
+		);
+	}
 
+	public function testParams()
+	{
+		$builder = new Builder();
+		$builder->params(['test' => 'param']);
+
+		/** @var Container $container */
+		$container = $builder->container();
+		self::assertEquals('param', $container->getParameter('test'));
+	}
+
+	public function testParam()
+	{
+		$builder = new Builder();
+		$builder->param('test', 'param');
+
+		/** @var Container $container */
+		$container = $builder->container();
+		self::assertEquals('param', $container->getParameter('test'));
+	}
+
+	public function testBuilderReturnsContainerBuilderInstance()
+	{
+		self::assertInstanceOf(ContainerBuilder::class, (new Builder())->builder());
+	}
 }
