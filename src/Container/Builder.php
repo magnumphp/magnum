@@ -16,7 +16,7 @@ use Symfony\Component\Finder\Finder;
  *
  * This is basically a wrapper around Symfony's ContainerBuilder to make working with it a little easier.
  *
- * @NOTE This marks all instances as public
+ * @NOTE    This marks all instances as public
  *
  * @package Magnum\Container
  */
@@ -88,7 +88,8 @@ class Builder
 			(new PhpDumper($this->container))->dump(
 				[
 					'class' => $class
-				])
+				]
+			)
 		);
 	}
 
@@ -109,7 +110,8 @@ class Builder
 				[
 					$class,
 					$method
-				]);
+				]
+			);
 		$definition->setPublic(true);
 
 		$this->container->setDefinition($id, $definition);
@@ -213,7 +215,7 @@ class Builder
 	 */
 	public function findClassesInPath($path): array
 	{
-		$files = $this->resolveFinder()->files()->in($path)->name('*.php');
+		$files   = $this->resolveFinder()->files()->in($path)->name('*.php');
 		$classes = [];
 
 		foreach ($files as $file) {

@@ -3,26 +3,24 @@
 namespace Magnum\Container;
 
 use Magnum\Container\Exception\InvalidProvider;
-use Magnum\Container\Stub\BadConstructorC;
-use Magnum\Container\Stub\ConstructorA;
-use Magnum\Container\Stub\ConstructorB;
-use Magnum\Container\Stub\ConstructorC;
 use Magnum\Container\Stub\StubProvider;
 use Magnum\Container\Stub\StubProviderWithSubProvider;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
-use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class LoaderTest
 	extends TestCase
 {
 	public function testConstruction()
 	{
-		$vfs = vfsStream::setup('root', null, [
-			'container.php' => 'kakaw'
-		]);
+		$vfs    = vfsStream::setup(
+			'root',
+			null,
+			[
+				'container.php' => 'kakaw'
+			]
+		);
 		$loader = new Loader(false, $vfs->getChild('container.php')->url());
 
 		self::assertTrue($loader->isCompiled());
@@ -35,7 +33,7 @@ class LoaderTest
 
 	public function testLoadSavesCompiledContainer()
 	{
-		$vfs = vfsStream::setup('root');
+		$vfs  = vfsStream::setup('root');
 		$file = $vfs->url() . '/container.php';
 		(new Loader(true, $file))->load();
 
@@ -44,13 +42,19 @@ class LoaderTest
 
 	public function testLoadReturnsCompiledContainer()
 	{
-		$vfs = vfsStream::setup('root', null, [
-			'container.php' => '<?php class CompiledContainer implements \Psr\Container\ContainerInterface{
-				public function get($id) {}
-				public function has($id) {}
-			}'
-		]);
-		$file = $vfs->url() . '/container.php';
+		$vfs       = vfsStream::setup(
+			'root',
+			null,
+			[
+				'container.php' => <<<EOF
+<?php class CompiledContainer implements \Psr\Container\ContainerInterface{
+				public function get(\$id) {}
+				public function has(\$id) {}
+			}
+EOF
+			]
+		);
+		$file      = $vfs->url() . ' / container . php';
 		$container = (new Loader(true, $file))->load();
 
 		self::assertInstanceOf('CompiledContainer', $container);
@@ -61,10 +65,15 @@ class LoaderTest
 		$loader = new Loader();
 
 		$loader->register(StubProvider::class);
-		$loader->register(new class('a') implements Provider {
-			public function register(Builder $builder)
-			{}
-		});
+		$loader->register(
+			new class('a')
+				implements Provider
+			{
+				public function register(Builder $builder)
+				{
+				}
+			}
+		);
 
 		$this->expectException(InvalidProvider::class);
 		$loader->register('not_a_class');
@@ -84,7 +93,7 @@ class LoaderTest
 		$loader->register(StubProviderWithSubProvider::class);
 
 		self::assertTrue($loader->load()->getParameter('stub'));
-		self::assertTrue($loader->load()->getParameter('stub-with-sub'));
+		self::assertTrue($loader->load()->getParameter('stub - with - sub'));
 	}
 
 	public function testLoadInjectsParameters()

@@ -55,12 +55,10 @@
     "test" : "@php vendor/bin/phpunit --colors=always",
     "test-coverage" : "@php vendor/bin/phpunit --colors=always --coverage-html=tests/html-coverage",
     "sniff": [
-      "@php vendor/bin/phpcs --config-set installed_paths vendor/syberisle/coding-standards",
-      "@php vendor/bin/phpcs --standard=SyberIsle src/"
+      "@php vendor/bin/phpcs"
     ],
     "format" : [
-      "@php vendor/bin/phpcs --config-set installed_paths vendor/syberisle/coding-standards",
-      "@php vendor/bin/phpcbf --standard=SyberIsle src/"
+      "@php vendor/bin/phpcbf"
     ],
     "phpdoc" : [
       "docker run --rm -v $(pwd):/data phpdoc/phpdoc"

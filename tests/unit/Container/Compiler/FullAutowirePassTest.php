@@ -13,9 +13,6 @@ use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 class FullAutowirePassTest
 	extends TestCase
 {
-	/**
-	 * @TODO move to the AutowirePass test
-	 */
 	public function testAutowiringWithArguments()
 	{
 		$builder = new Builder();
@@ -51,7 +48,11 @@ class FullAutowirePassTest
 		$builder->instance(BadConstructorC::class);
 
 		$this->expectException(RuntimeException::class);
-		$this->expectExceptionMessage("Cannot autowire service \"Magnum\Container\Stub\BadConstructorC\": argument \"\$x\" of method \"__construct()\" has type \"Magnum\Container\Stub\ConstructorX\" but this class was not found.");
+		$this->expectExceptionMessage(
+			"Cannot autowire service \"Magnum\Container\Stub\BadConstructorC\"" .
+			": argument \"\$x\" of method \"__construct()\" has type " .
+			"\"Magnum\Container\Stub\ConstructorX\" but this class was not found."
+		);
 		$builder->container()->get(BadConstructorC::class);
 	}
 }

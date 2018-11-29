@@ -10,9 +10,10 @@ class InvalidProvider
 	public function __construct($received)
 	{
 		parent::__construct(
-			sprintf("Expected '%s' but got '%s'",
-					Provider::class,
-					is_string($received) ? $received : get_class($received)
+			sprintf(
+				"Expected '%s' but got '%s'",
+				Provider::class,
+				is_string($received) ? $received : get_class($received)
 			)
 		);
 	}
