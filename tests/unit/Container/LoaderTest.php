@@ -54,7 +54,7 @@ class LoaderTest
 EOF
 			]
 		);
-		$file      = $vfs->url() . ' / container . php';
+		$file      = $vfs->url() . '/container.php';
 		$container = (new Loader(true, $file))->load();
 
 		self::assertInstanceOf('CompiledContainer', $container);
@@ -91,9 +91,10 @@ EOF
 	{
 		$loader = new Loader();
 		$loader->register(StubProviderWithSubProvider::class);
+		$container = $loader->load();
 
-		self::assertTrue($loader->load()->getParameter('stub'));
-		self::assertTrue($loader->load()->getParameter('stub - with - sub'));
+		self::assertTrue($container->getParameter('stub'));
+		self::assertTrue($container->getParameter('stub-with-sub'));
 	}
 
 	public function testLoadInjectsParameters()

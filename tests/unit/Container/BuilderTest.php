@@ -12,6 +12,8 @@ use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\DependencyInjection\Tests\Compiler\ExtensionCompilerPassTest;
+use Symfony\Component\Finder\Finder;
 
 class BuilderTest
 	extends TestCase
@@ -103,18 +105,14 @@ class BuilderTest
 
 	public function testFindsClassesInPath()
 	{
+		$stubPath = __DIR__ . '/Stub';
 		$builder = new Builder();
-		self::assertEquals(
-			[
-				BadConstructorC::class,
-				ConstructorA::class,
-				ConstructorB::class,
-				ConstructorC::class,
-				StubProvider::class,
-				StubProviderWithSubProvider::class
-			],
-			$builder->findClassesInPath(__DIR__ . '/Stub')
-		);
+
+		$classes = [];
+		foreach (new \GlobIterator("$stubPath/*.php") as $file) {
+			$classes[] = __NAMESPACE__ . "\\Stub\\" . $file->getBaseName('.php');
+		}
+		self::assertEquals($classes, $builder->findClassesInPath($stubPath));
 	}
 
 	public function testParams()
@@ -140,5 +138,17 @@ class BuilderTest
 	public function testBuilderReturnsContainerBuilderInstance()
 	{
 		self::assertInstanceOf(ContainerBuilder::class, (new Builder())->builder());
+	}
+
+	public function testAddCompilerPass()
+	{
+		$pass = new Stub\DummyCompilerPass();
+
+		$builder = new Builder();
+		$builder->addCompilerPass($pass);
+
+		$container = $builder->container();
+
+		self::assertTrue($pass->called);
 	}
 }

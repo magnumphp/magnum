@@ -37,12 +37,23 @@ class Builder
 		$this->container = new ContainerBuilder;
 
 		// Ensure full auto-wire is set up
-		$config = $this->container->getCompiler()->getPassConfig();
-		$config->addPass(
+		$this->container->addCompilerPass(
 			new Compiler\FullAutowirePass(),
 			PassConfig::TYPE_OPTIMIZE,
 			10
 		);
+	}
+
+	/**
+	 * Proxies the addCompilerPass
+	 *
+	 * @return Builder
+	 */
+	public function addCompilerPass(): Builder
+	{
+		$this->container->addCompilerPass(...func_get_args());
+
+		return $this;
 	}
 
 	/**
