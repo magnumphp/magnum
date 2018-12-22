@@ -2,15 +2,9 @@
 
 namespace Magnum\Http;
 
-use Middlewares\Utils\Factory\ResponseFactory;
-use Pipeware\Pipeline\Basic;
-use Pipeware\Processor;
 use Pipeware\Stack;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\RequestHandlerInterface;
-use Slim\Http\Request;
 
 class Application
 {
