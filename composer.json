@@ -35,6 +35,7 @@
     "josegonzalez/dotenv": "^3.2",
     "middlewares/utils": "^1.0 | ^2.1",
     "mindplay/filereflection": "^1.2",
+    "nikic/fast-route": "^1.0",
     "psr/http-message": "^1.0",
     "slim/slim": "4.x-dev",
     "symfony/console": "^4.1",
