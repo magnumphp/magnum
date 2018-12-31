@@ -6,6 +6,7 @@ use Symfony\Component\DependencyInjection\Compiler\AbstractRecursivePass;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\AutowiringFailedException;
 use Symfony\Component\DependencyInjection\LazyProxy\ProxyHelper;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
  * Implements a full auto-wire pass in the Symfony DI Compiler
@@ -23,14 +24,38 @@ class FullAutowirePass
 	 */
 	protected function processValue($value, $isRoot = false)
 	{
-		if ($value instanceof Definition &&
-			$value->isAutowired() &&
-			$value->getClass()
-		) {
-			$this->resolveAutowiredReference($value);
+		if ($value instanceof Definition) {
+			if ($value->isAutowired() && $value->getClass()) {
+				$this->resolveAutowiredReference($value);
+			}
+			elseif ($value->getFactory()) {
+				$this->resolveFactoryReferences($value);
+			}
 		}
 
 		return parent::processValue($value, $isRoot);
+	}
+
+	/**
+	 * Runs the auto-wire resolution on the factory method
+	 *
+	 * @param Definition $definition
+	 * @throws \ReflectionException
+	 */
+	protected function resolveFactoryReferences(Definition $definition)
+	{
+		list($class, $method) = $definition->getFactory();
+		if ($reflectionClass = $this->container->getReflectionClass($class, false)) {
+			$reflectionMethod = $reflectionClass->getMethod($method);
+
+			if ($reflectionMethod) {
+				foreach ($reflectionMethod->getParameters() as $param) {
+					if ($param->hasType()) {
+						$this->load($param->getType());
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -90,18 +115,7 @@ class FullAutowirePass
 			}
 
 			if ($type = ProxyHelper::getTypeHint($constructor, $param, true)) {
-				// check if the container already knows how to handle this type.
-				if ($this->container->hasDefinition($type) ||
-					$this->container->hasAlias($type) ||
-					$this->container->has($type)
-				) {
-					continue;
-				}
-
-				// container doesn't know about it, load it
-				if (class_exists($type)) {
-					$this->load($type);
-				}
+				$this->load($type);
 			}
 		}
 	}
@@ -114,6 +128,17 @@ class FullAutowirePass
 	 */
 	protected function load($class): void
 	{
+		if ($this->container->hasDefinition($class) ||
+			$this->container->hasAlias($class) ||
+			$this->container->has($class)
+		) {
+			return;
+		}
+
+		if (!class_exists($class)) {
+			return;
+		}
+
 		if ($reflectionClass = $this->container->getReflectionClass($class, false)) {
 			if ($constructor = $reflectionClass->getConstructor()) {
 				$this->loadConstructorArguments($constructor);

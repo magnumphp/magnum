@@ -150,7 +150,7 @@ class Loader
 		}
 
 		$builder = $this->builder();
-		$builder->params($this->params);
+		$builder->setParameters($this->params);
 
 		foreach ($this->providers as $provider) {
 			$provider->register($builder);

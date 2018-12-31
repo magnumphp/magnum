@@ -17,6 +17,6 @@ class StubProviderWithSubProvider
 
 	public function register(Builder $builder)
 	{
-		$builder->param('stub-with-sub', true);
+		$builder->setParameter('stub-with-sub', true);
 	}
 }

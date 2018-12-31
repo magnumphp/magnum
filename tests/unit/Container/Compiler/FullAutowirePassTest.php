@@ -17,6 +17,7 @@ class FullAutowirePassTest
 	{
 		$builder = new Builder();
 		$builder->instance(ConstructorB::class)
+				->setPublic(true)
 				->setArgument('$a', new ConstructorA());
 
 		$obj = $builder->container()->get(ConstructorB::class);
@@ -26,8 +27,8 @@ class FullAutowirePassTest
 	public function testAutowiringWithKnownClass()
 	{
 		$builder = new Builder();
-		$builder->singleton(ConstructorA::class);
-		$builder->instance(ConstructorB::class);
+		$builder->singleton(ConstructorA::class)->setPublic(true);
+		$builder->instance(ConstructorB::class)->setPublic(true);
 
 		$obj = $builder->container()->get(ConstructorB::class);
 		self::assertInstanceOf(ConstructorA::class, $obj->a);
@@ -36,7 +37,7 @@ class FullAutowirePassTest
 	public function testAutowiringWithVariadic()
 	{
 		$builder = new Builder();
-		$builder->singleton(ConstructorC::class);
+		$builder->singleton(ConstructorC::class)->setPublic(true);
 
 		$obj = $builder->container()->get(ConstructorC::class);
 		self::assertInstanceOf(ConstructorA::class, $obj->a);
@@ -45,7 +46,7 @@ class FullAutowirePassTest
 	public function testAutowiringFails()
 	{
 		$builder = new Builder();
-		$builder->instance(BadConstructorC::class);
+		$builder->instance(BadConstructorC::class)->setPublic(true);
 
 		$this->expectException(RuntimeException::class);
 		$this->expectExceptionMessage(

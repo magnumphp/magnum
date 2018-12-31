@@ -11,6 +11,6 @@ class StubProvider
 
 	public function register(Builder $builder)
 	{
-		$builder->param('stub', true);
+		$builder->setParameter('stub', true);
 	}
 }
