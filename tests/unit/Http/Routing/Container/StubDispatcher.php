@@ -15,7 +15,6 @@ class StubDispatcher
 
 	public function dispatch($httpMethod, $uri)
 	{
-		// TODO: Implement dispatch() method.
+		// just a stub
 	}
-
 }

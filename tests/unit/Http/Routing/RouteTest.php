@@ -2,7 +2,6 @@
 
 namespace Magnum\Http\Routing;
 
-
 use PHPUnit\Framework\TestCase;
 
 class RouteTest

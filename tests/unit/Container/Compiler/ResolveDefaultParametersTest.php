@@ -35,6 +35,4 @@ class ResolveDefaultParametersTest
 
 		self::assertEquals('test', $a->a);
 	}
-
-
 }

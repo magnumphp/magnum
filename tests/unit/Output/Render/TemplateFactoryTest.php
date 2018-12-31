@@ -3,7 +3,6 @@
 namespace Magnum\Output\Render;
 
 use PHPUnit\Framework\TestCase;
-use Phrender\Engine;
 
 class TemplateFactoryTest
 	extends TestCase
@@ -24,8 +23,8 @@ class TemplateFactoryTest
 	{
 		$tf = new TemplateFactory([TPL_PATH]);
 		self::assertInstanceOf(View::class, $tf->load('test'));
-
 	}
+
 	public function testLoadHonorsAbsolutePath()
 	{
 		$tf = new TemplateFactory();

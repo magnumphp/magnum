@@ -39,7 +39,6 @@ class RouteCollectorTest
 	{
 		list($frc, $rc) = $this->generateCollector($method, '/test/path', 'test-name', ['test::class']);
 
-		// @TODO write an assertRouteExists($method, $name, $value)
 		$routes = $frc->getData();
 		$method = strtoupper($method);
 
@@ -51,7 +50,6 @@ class RouteCollectorTest
 	{
 		list($frc, $rc) = $this->generateCollector('any', '/test/path', 'test-name', ['test::class']);
 
-		// @TODO write an assertRouteExists($method, $name, $value)
 		$routes = $frc->getData();
 
 		self::assertTrue(isset($routes[0]['*']['/test/path']));

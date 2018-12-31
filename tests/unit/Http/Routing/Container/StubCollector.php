@@ -2,7 +2,6 @@
 
 namespace Magnum\Http\Routing\Container;
 
-
 use Magnum\Http\Routing\RouteCollector;
 
 class StubCollector
@@ -30,5 +29,4 @@ class StubCollector
 			$this->routes[$method][$path] = [$name, $middleware];
 		}
 	}
-
 }

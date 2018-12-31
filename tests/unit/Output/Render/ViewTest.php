@@ -28,9 +28,11 @@ class ViewTest
 
 	public function testRenderEscapes()
 	{
-		$view = $this->buildView('test');
-		$view->escaper = new class() {
-			function escape($str) {
+		$view          = $this->buildView('test');
+		$view->escaper = new class()
+		{
+			function escape($str)
+			{
 				return "%{$str}%";
 			}
 		};
@@ -40,9 +42,11 @@ class ViewTest
 
 	public function testMagicGetEscapes()
 	{
-		$view = $this->buildView('test-get');
-		$view->escaper = new class() {
-			function escape($str) {
+		$view          = $this->buildView('test-get');
+		$view->escaper = new class()
+		{
+			function escape($str)
+			{
 				return "%{$str}%";
 			}
 		};
@@ -52,9 +56,11 @@ class ViewTest
 
 	public function testRawReturnsRealValue()
 	{
-		$view = $this->buildView('test-raw');
-		$view->escaper = new class() {
-			function escape($str) {
+		$view          = $this->buildView('test-raw');
+		$view->escaper = new class()
+		{
+			function escape($str)
+			{
 				return "%{$str}%";
 			}
 		};
