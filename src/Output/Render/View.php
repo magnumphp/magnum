@@ -13,6 +13,10 @@ class View
 {
 	public function __construct($file, TemplateFactory $factory)
 	{
+		if (empty($file)) {
+			throw new \InvalidArgumentException("A file is required");
+		}
+
 		parent::__construct($file, $factory);
 	}
 

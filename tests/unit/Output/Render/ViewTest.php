@@ -3,10 +3,19 @@
 namespace Magnum\Output\Render;
 
 use PHPUnit\Framework\TestCase;
+use Phrender\Template\Factory;
 
 class ViewTest
 	extends TestCase
 {
+	public function provideInvalidFileNames()
+	{
+		return [
+			[''],
+			[null]
+		];
+	}
+
 	protected function buildView($file): View
 	{
 		return new View(TPL_PATH . "/{$file}.php", new TemplateFactory([TPL_PATH]));
@@ -53,13 +62,13 @@ class ViewTest
 		self::assertEquals('test', $view->render(new MutableContext(['var' => 'test'])));
 	}
 
-//	public function testNeedsExtractionReturnsFalse()
-//	{
-//		self::assertFalse($this->buildView('test')->needsExtraction());
-//	}
-
-//	public function testNeedsExtractionReturnsTrue()
-//	{
-//		self::assertTrue($this->buildView('test-with-extraction')->needsExtraction());
-//	}
+	/**
+	 * @dataProvider provideInvalidFileNames
+	 */
+	public function testFileIsRequiredInConstructor($filename)
+	{
+		$this->expectException(\InvalidArgumentException::class);
+		$this->expectExceptionMessage('A file is required');
+		new View($filename, new Factory());
+	}
 }
