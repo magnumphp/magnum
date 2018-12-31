@@ -3,7 +3,6 @@
 namespace Magnum\Output\Render;
 
 use Interop\Output\Template;
-use Phrender\Engine;
 use Phrender\Exception\TemplateNotFound;
 use Phrender\Template\Factory;
 use Psr\Container\ContainerInterface;
@@ -12,33 +11,30 @@ class TemplateFactory
 	extends Factory
 {
 	/**
-	 * @var Engine
-	 */
-	protected $engine;
-
-	/**
 	 * @var ContainerInterface
 	 */
 	protected $container;
 
-	public function __construct(ContainerInterface $container, array $paths = [], string $ext = self::DEFAULT_EXT)
-	{
-		$this->container = $container;
-		parent::__construct($paths, $ext);
-	}
-
+	/**
+	 * {@inheritdoc}
+	 */
 	public function has($template)
 	{
 		try {
 			$this->load($template);
+
 			return true;
 		}
 		catch (TemplateNotFound $e) {
 			// nothing to do
 		}
+
 		return false;
 	}
 
+	/**
+	 * {@inheritdoc}
+	 */
 	public function load($template)
 	{
 		if ($template{0} === '/' && file_exists($template)) {
@@ -48,17 +44,13 @@ class TemplateFactory
 		return parent::load($template);
 	}
 
+	/**
+	 * Overrides the Factory method to provide our custom View
+	 *
+	 * {@inheritdoc}
+	 */
 	public function create($file): Template
 	{
-		return new View($file, $this, $this->getEngine());
-	}
-
-	protected function getEngine(): Engine
-	{
-		if (!$this->engine) {
-			$this->engine = $this->container->get(Engine::class);
-		}
-
-		return $this->engine;
+		return new View($file, $this);
 	}
 }

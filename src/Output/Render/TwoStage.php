@@ -10,7 +10,7 @@ class TwoStage
 	/**
 	 * @var int the level of rendering we are currently at
 	 */
-	private $level = 0;
+	private $depth = 0;
 
 	/**
 	 * @var string the name of the layout to use
@@ -35,7 +35,7 @@ class TwoStage
 	 */
 	public function reset()
 	{
-		$this->level = 0;
+		$this->depth = 0;
 		unset($this->layoutDone);
 	}
 
@@ -48,12 +48,12 @@ class TwoStage
 	 */
 	public function render($template, $data = null)
 	{
-		$this->level++;
+		$this->depth++;
 
 		$view   = $template{0} === '/' ? $template : "views/{$template}";
 		$output = parent::render($view, $data);
 
-		if (isset($this->layout) && --$this->level === 0 && !isset($this->layoutDone)) {
+		if (isset($this->layout) && --$this->depth === 0 && !isset($this->layoutDone)) {
 			$layout = $this->layout{0} === '/' ? $this->layout : "layouts/{$this->layout}";
 
 			$this->layoutDone = true;
