@@ -1,74 +1,47 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Console\ServiceProvider
+ */
+
 namespace Magnum\Console;
 
-use Psr\Container\ContainerInterface;
+use Magnum\Console\CommandLoader\Commands;
+use Magnum\Console\Container\ConsoleCommandPass;
+use Magnum\Container\Builder;
+use Magnum\Container\Provider;
+use Symfony\Component\DependencyInjection\Parameter;
+use Symfony\Component\DependencyInjection\Reference;
 
 /**
- * Class ServiceProvider
- *
- * This class needs to remember the state of certain calls to ensure they always return the same objects, these are
- * stored in the instances property
+ * A basic service provider for the Magnum Container Builder that sets up the basic console
  *
  * @package Magnum\Http
  */
 class ServiceProvider
+	implements Provider
 {
-	const DEFAULT_APP_NAME = 'Unknown';
+	const DEFAULT_APP_NAME    = 'Unknown';
 	const DEFAULT_APP_VERSION = '0.0.0';
-	const APP_NAME_KEY = 'app/name';
-	const APP_VERSION_KEY = 'app/version';
-	const APP_COMMANDS_KEY = 'app/commands';
+	const APP_NAME_KEY        = 'app_name';
+	const APP_VERSION_KEY     = 'app_version';
 
-	protected $instances = [];
-
-	public function services()
+	public function register(Builder $builder)
 	{
-		return [
-			self::APP_COMMANDS_KEY => [],
-			Application::class     => [$this, 'app']
-		];
-	}
-
-	public function app(ContainerInterface $container)
-	{
-		return $this->instance(
-			Application::class,
-			function () use (&$container) {
-				$app = new Application(
-					$this->fetchFromContainer($container, self::APP_NAME_KEY, self::DEFAULT_APP_NAME),
-					$this->fetchFromContainer($container, self::APP_VERSION_KEY, self::DEFAULT_APP_VERSION),
-					$container
+		$builder->setParameterDefault(self::APP_NAME_KEY, static::DEFAULT_APP_NAME);
+		$builder->setParameterDefault(self::APP_VERSION_KEY, static::DEFAULT_APP_VERSION);
+		$builder->register(Application::class)
+				->setArguments(
+					[
+						'$commandLoader' => new Reference(Commands::class),
+						'$name'          => new Parameter(self::APP_NAME_KEY),
+						'$version'       => new Parameter(self::APP_VERSION_KEY)
+					]
 				);
 
-				if ($container->has(self::APP_COMMANDS_KEY)) {
-					foreach ($container->get(self::APP_COMMANDS_KEY) as $key) {
-						$app->add($container->get($key));
-					}
-				}
+		$builder->register(Commands::class);
 
-				return $app;
-			}
-		);
-	}
-
-	/**
-	 * @param ContainerInterface $container
-	 * @param string             $key
-	 * @param string             $default
-	 * @return mixed Returns the value from the container
-	 */
-	protected function fetchFromContainer(ContainerInterface $container, $key, $default)
-	{
-		return $container->has($key) ? $container->get($key) : $default;
-	}
-
-	protected function instance($key, $callable)
-	{
-		if (!isset($this->instances[$key])) {
-			$this->instances[$key] = $callable();
-		}
-
-		return $this->instances[$key];
+		$builder->addCompilerPass(new ConsoleCommandPass());
 	}
 }

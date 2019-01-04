@@ -7,8 +7,10 @@
 
 namespace Magnum\Console;
 
+use Magnum\Console\CommandLoader\Commands;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -26,20 +28,32 @@ class Application
 	 */
 	protected $container;
 
-	public function __construct(ContainerInterface $container, string $name = 'UNKNOWN', string $version = 'UNKNOWN')
+	/**
+	 * @var CommandLoaderInterface
+	 */
+	protected $commandLoader;
+
+	public function __construct(ContainerInterface $container, ?CommandLoaderInterface $commandLoader = null,
+								string $name = 'UNKNOWN', string $version = 'UNKNOWN')
 	{
 		$this->container = $container;
 		parent::__construct($name, $version);
+
+		$commandLoader && $this->setCommandLoader($commandLoader);
 	}
 
 	/**
-	 * Sets the container
+	 * Override to run the register on the commands
 	 *
-	 * @param ContainerInterface $container
+	 * @param CommandLoaderInterface $commandLoader
 	 */
-	public function setContainer(ContainerInterface $container)
+	public function setCommandLoader(CommandLoaderInterface $commandLoader)
 	{
-		$this->container = $container;
+		if ($commandLoader instanceof Commands) {
+			$commandLoader->register($this);
+		}
+
+		parent::setCommandLoader($commandLoader);
 	}
 
 	/**

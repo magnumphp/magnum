@@ -28,7 +28,7 @@ class CommandConfig
 	 */
 	protected $app;
 
-	public function __construct($name, Application $app)
+	public function __construct($name, ?Application $app)
 	{
 		parent::__construct($name);
 		$this->app  = $app;
@@ -50,7 +50,6 @@ class CommandConfig
 	/**
 	 * Returns the existing handler
 	 *
-	 * @param $handler
 	 * @return string|callable|CommandHandler
 	 */
 	public function getHandler()

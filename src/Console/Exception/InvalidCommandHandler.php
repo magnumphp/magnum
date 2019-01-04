@@ -9,6 +9,11 @@ namespace Magnum\Console\Exception;
 
 use Magnum\Console\CommandHandler;
 
+/**
+ * Exception thrown when the command handler is not a CommandHandler interface or callable
+ *
+ * @package Magnum\Console\Exception
+ */
 class InvalidCommandHandler
 	extends \RuntimeException
 {
