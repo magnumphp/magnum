@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\ProxyManager\Proxy
+ */
+
 namespace Magnum\ProxyManager;
 
 /**
@@ -14,7 +19,7 @@ class Proxy
 	 */
 	protected static $instance;
 
-	public static function setInstance($instance)
+	public static function setInstance(Manager $instance)
 	{
 		self::$instance = $instance;
 	}
@@ -29,6 +34,6 @@ class Proxy
 	 */
 	public static function __callStatic($method, $args)
 	{
-		return call_user_func_array(array(static::$instance, $method), $args);
+		return (static::$instance)->$method(...$args);
 	}
 }

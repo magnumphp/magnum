@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\ProxyManager\Manager
+ */
+
 namespace Magnum\ProxyManager;
 
 use Psr\Container\ContainerInterface;
@@ -14,11 +19,6 @@ class Manager
 {
 	const ROOT_NAMESPACE_GLOBAL = false;
 	const ROOT_NAMESPACE_ANY = true;
-
-	/**
-	 * @var Manager
-	 */
-	protected static $instance;
 
 	/**
 	 * @var ContainerInterface Container to inject into the Static Proxy classes and that holds the actual instances
@@ -98,18 +98,5 @@ class Manager
 		StaticProxy::setContainer($this->container);
 
 		return $this;
-	}
-
-	/**
-	 * Performs the proxying of the statically called method to the Proxy Subject in the Container
-	 *
-	 * @param string $method
-	 * @param array $args
-	 *
-	 * @return mixed
-	 */
-	public static function __callStatic($method, $args)
-	{
-		return call_user_func_array(array(static::$instance, $method), $args);
 	}
 }

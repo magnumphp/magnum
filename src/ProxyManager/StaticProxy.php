@@ -1,7 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\ProxyManager\StaticProxy
+ */
+
 namespace Magnum\ProxyManager;
 
+use Magnum\Container\Builder;
 use Psr\Container\ContainerInterface;
 
 /**
@@ -22,9 +28,23 @@ abstract class StaticProxy
 	 *
 	 * @return mixed
 	 */
-	public static function setContainer(ContainerInterface $container)
+	public static function setContainer($container)
 	{
-		static::$container = $container;
+		if ($container instanceof Builder) {
+			static::$container = $container->container();
+		}
+		elseif ($container instanceof ContainerInterface) {
+			static::$container = $container;
+		}
+		else {
+			throw new \InvalidArgumentException(
+				sprintf(
+					"Argument must implement %s or %s. Received %s",
+					ContainerInterface::class,
+					Builder::class,
+					get_class($container)
+				));
+		}
 	}
 
 	/**
@@ -35,6 +55,10 @@ abstract class StaticProxy
 	 */
 	public static function getInstance()
 	{
+		if (!empty(static::$instance)) {
+			return static::$instance;
+		}
+
 		if (!(static::$container instanceof ContainerInterface)) {
 			throw new \RuntimeException('The Proxy Subject cannot be retrieved because the Container is not set.');
 		}
@@ -50,7 +74,12 @@ abstract class StaticProxy
 	 */
 	public static function getInstanceIdentifier()
 	{
-		throw new \BadMethodCallException('The' . __METHOD__ . ' method must be implemented by a subclass.');
+		throw new \BadMethodCallException(
+			sprintf(
+				'The %s method must be implemented by %s.',
+				__METHOD__,
+				get_called_class()
+			));
 	}
 
 	/**
@@ -63,6 +92,6 @@ abstract class StaticProxy
 	 */
 	public static function __callStatic($method, $args)
 	{
-		return call_user_func_array(array(static::getInstance(), $method), $args);
+		return (static::getInstance())->$method(...$args);
 	}
 }
