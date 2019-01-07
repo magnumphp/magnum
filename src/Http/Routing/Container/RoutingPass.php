@@ -40,7 +40,8 @@ class RoutingPass
 					"Only %s or %s are accepted phases",
 					PassConfig::TYPE_BEFORE_OPTIMIZATION,
 					PassConfig::TYPE_OPTIMIZE
-				));
+				)
+			);
 		}
 
 		$this->phase = $phase;
@@ -58,7 +59,10 @@ class RoutingPass
 	public static function registerWithBuilder(Builder $builder)
 	{
 		$builder->addCompilerPass(new RoutingPass(PassConfig::TYPE_OPTIMIZE), PassConfig::TYPE_OPTIMIZE);
-		$builder->addCompilerPass(new RoutingPass(PassConfig::TYPE_BEFORE_OPTIMIZATION), PassConfig::TYPE_BEFORE_OPTIMIZATION);
+		$builder->addCompilerPass(
+			new RoutingPass(PassConfig::TYPE_BEFORE_OPTIMIZATION),
+			PassConfig::TYPE_BEFORE_OPTIMIZATION
+		);
 	}
 
 	/**

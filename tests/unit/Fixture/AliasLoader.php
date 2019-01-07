@@ -18,5 +18,4 @@ class AliasLoader
 	{
 		return $this->registered;
 	}
-
 }

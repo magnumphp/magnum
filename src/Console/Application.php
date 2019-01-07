@@ -33,9 +33,12 @@ class Application
 	 */
 	protected $commandLoader;
 
-	public function __construct(ContainerInterface $container, ?CommandLoaderInterface $commandLoader = null,
-								string $name = 'UNKNOWN', string $version = 'UNKNOWN')
-	{
+	public function __construct(
+		ContainerInterface $container,
+		?CommandLoaderInterface $commandLoader = null,
+		string $name = 'UNKNOWN',
+		string $version = 'UNKNOWN'
+	) {
 		$this->container = $container;
 		parent::__construct($name, $version);
 

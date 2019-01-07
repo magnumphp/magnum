@@ -26,7 +26,10 @@ class StaticProxyTest
 	public function testSetContainerThrowsException()
 	{
 		$this->expectException(\InvalidArgumentException::class);
-		$this->expectExceptionMessage("Argument must implement Psr\\Container\\ContainerInterface or Magnum\\Container\\Builder. Received stdClass");
+		$this->expectExceptionMessage(
+			"Argument must implement Psr\\Container\\ContainerInterface " .
+			"or Magnum\\Container\\Builder. Received stdClass"
+		);
 
 		StaticProxy::setContainer(new \stdClass());
 	}
@@ -52,7 +55,10 @@ class StaticProxyTest
 	public function testGetInstanceIdentifierThrowsException()
 	{
 		$this->expectException(\BadMethodCallException::class);
-		$this->expectExceptionMessage("The Magnum\\ProxyManager\\StaticProxy::getInstanceIdentifier method must be implemented by Magnum\\Fixture\\BadProxy.");
+		$this->expectExceptionMessage(
+			"The Magnum\\ProxyManager\\StaticProxy::getInstanceIdentifier" .
+			"method must be implemented by Magnum\\Fixture\\BadProxy."
+		);
 
 		BadProxy::getInstance();
 	}

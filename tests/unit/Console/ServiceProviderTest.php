@@ -23,7 +23,7 @@ class ServiceProviderTest
 		// this is necessary so we can actually call get() on the container
 		$this->builder->get(Application::class)->setPublic(true);
 
-		$this->builder->setParameterDefault('path' , '.');
+		$this->builder->setParameterDefault('path', '.');
 	}
 
 	public function testRegistration()
@@ -45,7 +45,7 @@ class ServiceProviderTest
 	public function testRegisterUsesStaticVersion()
 	{
 		$b = new Builder();
-		$b->setParameterDefault('path' , '.');
+		$b->setParameterDefault('path', '.');
 
 		(new TestProvider())->register($b);
 

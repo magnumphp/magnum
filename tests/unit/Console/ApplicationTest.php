@@ -32,7 +32,8 @@ class ApplicationTest
 			->setHandler(
 				function () use (&$ran) {
 					$ran = true;
-				});
+				}
+			);
 		$app->setAutoExit(false);
 		$app->run(
 			new ArgvInput(['test', 'test']),
@@ -68,10 +69,9 @@ class ApplicationTest
 		$container->register(Commands::class)->setPublic(true);
 		$container->setParameter('path', '.');
 		$container->register(Application::class)
-			->setPublic(true)
-			->setArgument('$container', new Reference(ContainerInterface::class))
-			->setArgument('$commandLoader', new Reference(Commands::class))
-			;
+				  ->setPublic(true)
+				  ->setArgument('$container', new Reference(ContainerInterface::class))
+				  ->setArgument('$commandLoader', new Reference(Commands::class));
 
 		$o = new DummyOutput();
 		$container->compile();

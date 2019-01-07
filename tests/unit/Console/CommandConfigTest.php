@@ -39,10 +39,12 @@ class CommandConfigTest
 	public function testExecuteRunsCallable()
 	{
 		$ran = false;
-		$cc = new CommandConfig('test', new Application(new Container()));
-		$cc->setHandler(function () use (&$ran) {
-			$ran = true;
-		});
+		$cc  = new CommandConfig('test', new Application(new Container()));
+		$cc->setHandler(
+			function () use (&$ran) {
+				$ran = true;
+			}
+		);
 
 		$c = new CommandTester($cc);
 		$c->execute([]);
@@ -53,7 +55,11 @@ class CommandConfigTest
 	public function testExecuteThrowsException()
 	{
 		$cc = new CommandConfig('test', new Application(new Container()));
-		$cc->setHandler(new class {});
+		$cc->setHandler(
+			new class
+			{
+			}
+		);
 
 		$c = new CommandTester($cc);
 

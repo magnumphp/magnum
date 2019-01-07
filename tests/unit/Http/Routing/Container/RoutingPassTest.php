@@ -37,7 +37,11 @@ class RoutingPassTest
 	public function setUp()
 	{
 		$cb = new ContainerBuilder();
-		$cb->addCompilerPass(new RoutingPass(PassConfig::TYPE_BEFORE_OPTIMIZATION), PassConfig::TYPE_BEFORE_OPTIMIZATION, 10);
+		$cb->addCompilerPass(
+			new RoutingPass(PassConfig::TYPE_BEFORE_OPTIMIZATION),
+			PassConfig::TYPE_BEFORE_OPTIMIZATION,
+			10
+		);
 		$cb->addCompilerPass(new RoutingPass(PassConfig::TYPE_OPTIMIZE), PassConfig::TYPE_OPTIMIZE, 10);
 
 		// custom class for the routeCollector to register we have routes...

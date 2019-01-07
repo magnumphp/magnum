@@ -21,9 +21,11 @@ class CommandsTest
 	{
 		$this->vfs  = vfsStream::setup('root');
 		$this->cmds = new Commands(
-			'', [
-			TestCommand::class
-		]);
+			'',
+			[
+				TestCommand::class
+			]
+		);
 
 		$this->app = new Application(new Container());
 	}
@@ -69,7 +71,10 @@ class CommandsTest
 
 	public function testConstructorLoadsFromSavedFile()
 	{
-		file_put_contents($this->vfs->url() . '/_commands.php', '<?php return ["cache-command" => "Magnum\Console\Fixture\TestCommand"];');
+		file_put_contents(
+			$this->vfs->url() . '/_commands.php',
+			'<?php return ["cache-command" => "Magnum\Console\Fixture\TestCommand"];'
+		);
 		$cmds = new Commands($this->vfs->url(), []);
 		self::assertTrue($cmds->has('cache-command'));
 	}
@@ -82,12 +87,14 @@ class CommandsTest
 
 		$file = $this->vfs->url() . '/_commands.php';
 		self::assertFileExists($file);
-		self::assertEquals(<<<EOF
+		self::assertEquals(
+			<<<EOF
 <?php return array (
   'test-command' => 'Magnum\\\\Console\\\\Fixture\\\\TestCommand',
 );
 EOF
-		 	, file_get_contents($file)
-		 );
+			,
+			file_get_contents($file)
+		);
 	}
 }

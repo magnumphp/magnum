@@ -43,7 +43,8 @@ abstract class StaticProxy
 					ContainerInterface::class,
 					Builder::class,
 					get_class($container)
-				));
+				)
+			);
 		}
 	}
 
@@ -79,7 +80,8 @@ abstract class StaticProxy
 				'The %s method must be implemented by %s.',
 				__METHOD__,
 				get_called_class()
-			));
+			)
+		);
 	}
 
 	/**

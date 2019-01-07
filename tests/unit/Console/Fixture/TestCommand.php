@@ -15,5 +15,4 @@ class TestCommand
 		$config->setName('test-command')->setHandler(__CLASS__);
 		self::$seen =true;
 	}
-
 }
