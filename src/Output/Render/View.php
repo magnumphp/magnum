@@ -1,11 +1,14 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Output\Render\View
+ */
+
 namespace Magnum\Output\Render;
 
 use Interop\Output\Context as InteropContext;
-use Interop\Output\Context;
 use Interop\Output\TemplateFactory;
-use Phrender\Engine;
 use Phrender\Template\Template;
 
 class View

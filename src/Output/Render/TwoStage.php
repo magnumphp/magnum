@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Output\Render\TwoStage
+ */
+
 namespace Magnum\Output\Render;
 
 use Phrender\Engine;

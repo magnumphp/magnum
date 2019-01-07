@@ -1,4 +1,10 @@
 <?php
+
+/**
+ * @file
+ * Contains Magnum\Output\Render\MutableContext
+ */
+
 namespace Magnum\Output\Render;
 
 use Interop\Output\Context;

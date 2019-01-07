@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Output\Render\TemplateFactory
+ */
+
 namespace Magnum\Output\Render;
 
 use Interop\Output\Template;
