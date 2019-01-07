@@ -8,6 +8,7 @@ use Magnum\Container\Stub\ConstructorB;
 use Magnum\Container\Stub\ConstructorC;
 use Magnum\Container\Stub\StubProvider;
 use Magnum\Container\Stub\StubProviderWithSubProvider;
+use Magnum\Fixture\TestProxy;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
@@ -211,5 +212,13 @@ class BuilderTest
 		$obj       = $container->get(ConstructorA::class);
 
 		self::assertEquals('param_test', $obj->a);
+	}
+
+	public function testProxy()
+	{
+		$builder = new Builder();
+		$builder->proxy('TestProxy', TestProxy::class);
+
+		self::assertEquals(['TestProxy' => TestProxy::class], $builder->container()->getParameter('proxies'));
 	}
 }

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Container\Provider
+ */
+
 namespace Magnum\Container;
 
 /**

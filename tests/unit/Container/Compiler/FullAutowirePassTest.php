@@ -7,6 +7,7 @@ use Magnum\Container\Stub\BadConstructorC;
 use Magnum\Container\Stub\ConstructorA;
 use Magnum\Container\Stub\ConstructorB;
 use Magnum\Container\Stub\ConstructorC;
+use Magnum\Container\Stub\TestFactory;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 
@@ -55,5 +56,14 @@ class FullAutowirePassTest
 			"\"Magnum\Container\Stub\ConstructorX\" but this class was not found."
 		);
 		$builder->container()->get(BadConstructorC::class);
+	}
+
+	public function testResolveFactoryReferences()
+	{
+		$builder = new Builder();
+
+		$builder->factory('test', TestFactory::class, 'build')->setPublic(true);
+
+		self::assertInstanceOf(ConstructorA::class, $builder->container()->get('test'));
 	}
 }

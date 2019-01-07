@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Container\Exception\InvalidProvider
+ */
+
 namespace Magnum\Container\Exception;
 
 use Magnum\Container\Provider;

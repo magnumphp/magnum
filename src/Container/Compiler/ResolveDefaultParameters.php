@@ -1,13 +1,14 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Container\Compiler\ResolveDefaultParameters
+ */
+
 namespace Magnum\Container\Compiler;
 
-use Symfony\Component\DependencyInjection\Compiler\AbstractRecursivePass;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
-use Symfony\Component\DependencyInjection\Definition;
-use Symfony\Component\DependencyInjection\Exception\AutowiringFailedException;
-use Symfony\Component\DependencyInjection\LazyProxy\ProxyHelper;
 
 /**
  * Implements default parameters in the container.

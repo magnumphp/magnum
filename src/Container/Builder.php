@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Container\Builder
+ */
+
 namespace Magnum\Container;
 
 use mindplay\filereflection\ReflectionFile;
@@ -9,7 +14,7 @@ use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
-use Symfony\Component\DependencyInjection\Reference;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -32,13 +37,18 @@ class Builder
 	protected $finder;
 
 	/**
+	 * @var array List of proxy classes
+	 */
+	protected $proxies = [];
+
+	/**
 	 * @var Compiler\ResolveDefaultParameters
 	 */
 	protected $defaultParametersResolver;
 
-	public function __construct()
+	public function __construct($parameterBag = null)
 	{
-		$this->container = new ContainerBuilder;
+		$this->container = $this->resolveContainerBuilder($parameterBag);
 
 		// Ensure full auto-wire is set up
 		$this->container->addCompilerPass(
@@ -88,6 +98,8 @@ class Builder
 	 */
 	public function container(): ContainerInterface
 	{
+		$this->defaultParametersResolver->param('proxies', $this->proxies);
+
 		if ($this->container->isCompiled() === false) {
 			$this->container->compile();
 		}
@@ -105,17 +117,21 @@ class Builder
 	{
 		$this->container();
 
-		file_put_contents(
-			$file,
-			(new PhpDumper($this->container))->dump(
-				[
-					'class' => $class
-				]
-			)
-		);
+		file_put_contents($file, (new PhpDumper($this->container))->dump($this->resolveDumperParameters($class)));
 	}
 
 	// services
+
+	/**
+	 * Register an proxy with the system
+	 *
+	 * @param      $alias
+	 * @param      $className
+	 */
+	public function proxy($alias, $className)
+	{
+		$this->proxies[$alias] = $className;
+	}
 
 	/**
 	 * Register's an id as a single instance (shared among calls)
@@ -181,7 +197,7 @@ class Builder
 	/**
 	 * Returns the definition of the requested ID.
 	 *
-	 * NOTE: If you need the concret service call {$builder->container()->get($id)} instead
+	 * NOTE: If you need the concrete service call {$builder->container()->get($id)} instead
 	 *
 	 * @param string $id
 	 * @return Definition
@@ -296,6 +312,30 @@ class Builder
 	public function singleton(string $id, string $class = null): Definition
 	{
 		return $this->register($id, $class ?? $id);
+	}
+
+	/**
+	 * Resolves the container builder
+	 *
+	 * @param ParameterBagInterface $parameterBag
+	 * @return ContainerBuilder
+	 */
+	protected function resolveContainerBuilder(?ParameterBagInterface $parameterBag): ContainerBuilder
+	{
+		return new ContainerBuilder($parameterBag);
+	}
+
+	/**
+	 * Resolves the parameters used for dumping the container
+	 *
+	 * @param string $class
+	 * @return array
+	 */
+	protected function resolveDumperParameters(string $class): array
+	{
+		return [
+			'class'      => $class
+		];
 	}
 
 	/**

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Container\Compiler\FullAutowirePass
+ */
+
 namespace Magnum\Container\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\AbstractRecursivePass;
@@ -51,7 +56,8 @@ class FullAutowirePass
 			if ($reflectionMethod) {
 				foreach ($reflectionMethod->getParameters() as $param) {
 					if ($param->hasType()) {
-						$this->load($param->getType());
+						$this->load($type = $param->getType()->getName());
+						$definition->setArgument($param->getPosition(), new Reference($type));
 					}
 				}
 			}

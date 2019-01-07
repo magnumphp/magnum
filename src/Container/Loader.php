@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Container\Loader
+ */
+
 namespace Magnum\Container;
 
 use Magnum\Container\Exception\InvalidProvider;
@@ -142,11 +147,12 @@ class Loader
 	public function load(): ContainerInterface
 	{
 		if ($this->isCompiled) {
-			if (class_exists(static::COMPILED_CONTAINER_CLASS) === false) {
+			$class = static::COMPILED_CONTAINER_CLASS;
+			if (class_exists($class) === false) {
 				require $this->cacheFile;
 			}
 
-			return new \CompiledContainer;
+			return new $class;
 		}
 
 		$builder = $this->builder();
