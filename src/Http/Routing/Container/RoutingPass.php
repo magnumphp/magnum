@@ -1,13 +1,19 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Routing\Container\RoutingPass
+ */
+
 namespace Magnum\Http\Routing\Container;
 
 use FastRoute\Dispatcher;
-use Magnum\Http\Routing\Cache;
+use Magnum\Container\Builder;
 use Magnum\Http\Routing\RouteCollector;
 use Magnum\Http\Routing\RouteProvider;
 use Magnum\Http\Routing\Router;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
+use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 /**
@@ -19,46 +25,71 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 class RoutingPass
 	implements CompilerPassInterface
 {
-	const TAG_NAME                = 'routing.provider';
-	const PARAM_CACHE_ENABLED     = "routing.use_cache";
-	const PARAM_CACHE_PATH        = "routing.cache_path";
+	const TAG_NAME = 'routing.provider';
+
+	/**
+	 * @var string The phase of the RoutingPass that we are working on
+	 */
+	protected $phase;
+
+	public function __construct($phase)
+	{
+		if ($phase !== PassConfig::TYPE_BEFORE_OPTIMIZATION && $phase !== PassConfig::TYPE_OPTIMIZE) {
+			throw new \InvalidArgumentException(
+				sprintf(
+					"Only %s or %s are accepted phases",
+					PassConfig::TYPE_BEFORE_OPTIMIZATION,
+					PassConfig::TYPE_OPTIMIZE
+				));
+		}
+
+		$this->phase = $phase;
+	}
+
+	/**
+	 * Registers the compiler passes with the builder.
+	 *
+	 * Used because we have two passes:
+	 *  1) handles the setup of the Router/Dispatcher params
+	 *  2) handles the route parameters
+	 *
+	 * @param Builder $builder
+	 */
+	public static function registerWithBuilder(Builder $builder)
+	{
+		$builder->addCompilerPass(new RoutingPass(PassConfig::TYPE_OPTIMIZE), PassConfig::TYPE_OPTIMIZE);
+		$builder->addCompilerPass(new RoutingPass(PassConfig::TYPE_BEFORE_OPTIMIZATION), PassConfig::TYPE_BEFORE_OPTIMIZATION);
+	}
 
 	/**
 	 * {@inheritdoc}
 	 */
 	public function process(ContainerBuilder $container)
 	{
-		$cacheEnabled = $container->hasParameter(self::PARAM_CACHE_ENABLED)
-			? $container->getParameter(self::PARAM_CACHE_ENABLED)
-			: false;
-
-		$cache = $container->get(Cache::class);
-		if (!$cacheEnabled || !$cache->has(Cache::DISPATCH_DATA_KEY)) {
-			list($namedRoutes, $dispatchData) = $this->resolveRoutes($container);
-			if ($cacheEnabled) {
-				$cache->set(Cache::NAMED_ROUTES_KEY, $namedRoutes);
-				$cache->set(Cache::DISPATCH_DATA_KEY, $dispatchData);
-			}
-		}
-		else {
-			$namedRoutes  = $cache->get(Cache::NAMED_ROUTES_KEY);
-			$dispatchData = $cache->get(Cache::DISPATCH_DATA_KEY);
-		}
-
-		$container->getDefinition(Router::class)
-				  ->setArgument('$namedRoutes', $namedRoutes);
-		$container->getDefinition(Dispatcher::class)
-				  ->setArgument('$data', $dispatchData);
+		$this->{$this->phase}($container);
 	}
 
 	/**
-	 * Resolves the routes from the providers
+	 * Called during the before optimization phase of the Compiler Passes
 	 *
-	 * @param ContainerBuilder $container
-	 * @return array
-	 * @throws \Exception
+	 * @param $container
 	 */
-	protected function resolveRoutes(ContainerBuilder $container)
+	protected function beforeOptimization($container)
+	{
+		$container->getDefinition(Router::class)
+				  ->setArgument('$namedRoutes', '%routing.named_routes%');
+		$container->getDefinition(Dispatcher::class)
+				  ->setArgument('$data', '%routing.dispatch_data%');
+		$container->setParameter('routing.named_routes', ['']);
+		$container->setParameter('routing.dispatch_data', ['']);
+	}
+
+	/**
+	 * Called during the Optimization phase of the Compiler Passes
+	 *
+	 * @param $container
+	 */
+	protected function optimization($container)
 	{
 		/** @var RouteCollector $routeCollector */
 		$routeCollector = $container->get(RouteCollector::class);
@@ -69,9 +100,7 @@ class RoutingPass
 			}
 		}
 
-		return [
-			$routeCollector->namedRoutes(),
-			$routeCollector->dispatchData()
-		];
+		$container->setParameter('routing.named_routes', $routeCollector->namedRoutes());
+		$container->setParameter('routing.dispatch_data', $routeCollector->dispatchData());
 	}
 }

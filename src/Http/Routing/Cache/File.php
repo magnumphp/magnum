@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Routing\Cache\File
+ */
+
 namespace Magnum\Http\Routing\Cache;
 
 use Magnum\Http\Routing\Cache;

@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Routing\RouteCollector
+ */
+
 namespace Magnum\Http\Routing;
 
 use FastRoute\RouteCollector as FastRouteCollector;

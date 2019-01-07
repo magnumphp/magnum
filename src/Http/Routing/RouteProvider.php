@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Routing\RouteProvider
+ */
+
 namespace Magnum\Http\Routing;
 
 /**
