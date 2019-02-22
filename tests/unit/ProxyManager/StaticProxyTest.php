@@ -56,7 +56,7 @@ class StaticProxyTest
 	{
 		$this->expectException(\BadMethodCallException::class);
 		$this->expectExceptionMessage(
-			"The Magnum\\ProxyManager\\StaticProxy::getInstanceIdentifier" .
+			"The Magnum\\ProxyManager\\StaticProxy::getInstanceIdentifier " .
 			"method must be implemented by Magnum\\Fixture\\BadProxy."
 		);
 

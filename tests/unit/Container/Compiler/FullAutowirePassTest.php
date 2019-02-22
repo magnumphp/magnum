@@ -7,7 +7,10 @@ use Magnum\Container\Stub\BadConstructorC;
 use Magnum\Container\Stub\ConstructorA;
 use Magnum\Container\Stub\ConstructorB;
 use Magnum\Container\Stub\ConstructorC;
+use Magnum\Container\Stub\InheritedConstructor;
+use Magnum\Container\Stub\StubProvider;
 use Magnum\Container\Stub\TestFactory;
+use PHPUnit\Framework\MockObject\Stub;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Exception\RuntimeException;
 
@@ -33,6 +36,54 @@ class FullAutowirePassTest
 
 		$obj = $builder->container()->get(ConstructorB::class);
 		self::assertInstanceOf(ConstructorA::class, $obj->a);
+	}
+
+	public function testAutowiringWithParent()
+	{
+		$builder = new Builder();
+		$builder->instance(InheritedConstructor::class)->setPublic(true);
+
+		$obj = $builder->container()->get(InheritedConstructor::class);
+		self::assertInstanceOf(ConstructorA::class, $obj->a);
+	}
+
+	public function testAutowiringWithParentDefined()
+	{
+		$builder = new Builder();
+		$builder->singleton(ConstructorB::class)->setPublic(true)->setArgument('$a', 'kakaw');
+		$builder->instance(InheritedConstructor::class)->setPublic(true);
+
+		$obj = $builder->container()->get(InheritedConstructor::class);
+		self::assertEquals('kakaw', $obj->a);
+	}
+
+	public function testAutowiringWithParentAsAlias()
+	{
+		$builder = new Builder();
+		$builder->instance(ConstructorA::class)->setPublic(true)->setArgument('$a', 'kakaw');
+		$builder->alias(ConstructorA::class, ConstructorB::class)->setPublic(true);
+//		$builder->singleton(ConstructorB::class)->setPublic(true)->setArgument('$a', 'kakaw');
+		$builder->instance(InheritedConstructor::class)->setPublic(true);
+
+		$builder->get(InheritedConstructor::class);
+		$c = $builder->container();
+		$obj = $c->get(InheritedConstructor::class);
+		self::assertEquals('kakaw', $obj->a);
+	}
+
+	/*
+	 * This catches the exception from the DefinitionErrorExceptionPass and is really meant to ensure that we are
+	 * covering the last case of resolveInheritedValue
+	 */
+	public function testAutowiringWithParentNoArgsParams()
+	{
+		$builder = new Builder();
+		$builder->alias(StubProvider::class, ConstructorB::class)->setPublic(true);
+		$builder->instance(InheritedConstructor::class)->setPublic(true);
+		$builder->get(InheritedConstructor::class);
+
+		$this->expectException(RuntimeException::class);
+		$builder->container()->get(InheritedConstructor::class);
 	}
 
 	public function testAutowiringWithVariadic()

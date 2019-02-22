@@ -204,7 +204,7 @@ class Builder
 	 */
 	public function get(string $id)
 	{
-		return $this->container->getDefinition($id);
+		return $this->container->hasDefinition($id) ? $this->container->getDefinition($id) : null;
 	}
 
 	/**

@@ -7,4 +7,5 @@ use Magnum\ProxyManager\StaticProxy;
 class BadProxy
 	extends StaticProxy
 {
+
 }

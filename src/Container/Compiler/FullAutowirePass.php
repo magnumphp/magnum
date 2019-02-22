@@ -22,6 +22,11 @@ class FullAutowirePass
 	extends AbstractRecursivePass
 {
 	/**
+	 * @var array Caches the class arguments/parameters
+	 */
+	protected $classArgumentParameterCache = [];
+
+	/**
 	 * @param mixed $value
 	 * @param bool  $isRoot
 	 * @return mixed
@@ -34,7 +39,13 @@ class FullAutowirePass
 				$this->resolveAutowiredReference($value);
 			}
 			elseif ($value->getFactory()) {
-				$this->resolveFactoryReferences($value);
+				try {
+					$this->resolveFactoryReferences($value);
+				}
+				catch (\Exception $e) {
+					var_dump($value);
+					throw $e;
+				}
 			}
 		}
 
@@ -51,10 +62,9 @@ class FullAutowirePass
 	{
 		list($class, $method) = $definition->getFactory();
 		if ($reflectionClass = $this->container->getReflectionClass($class, false)) {
-			$reflectionMethod = $reflectionClass->getMethod($method);
-
-			if ($reflectionMethod) {
-				foreach ($reflectionMethod->getParameters() as $param) {
+			if ($reflectionMethod = $reflectionClass->getMethod($method)) {
+				$params = $reflectionMethod->getParameters();
+				foreach ($params as $param) {
 					if ($param->hasType()) {
 						$this->load($type = $param->getType()->getName());
 						$definition->setArgument($param->getPosition(), new Reference($type));
@@ -82,7 +92,7 @@ class FullAutowirePass
 			}
 
 			if ($constructor) {
-				$this->loadConstructorArguments($constructor, $value->getArguments());
+				$this->loadConstructorArguments($value, $constructor, $value->getArguments());
 			}
 		}
 		else {
@@ -100,11 +110,11 @@ class FullAutowirePass
 	/**
 	 * Loads any types defined in the constructor
 	 *
-	 * @param \ReflectionMethod $constructor The Constructor reflector
-	 * @param array             $arguments   List of arguments
+	 * @param \ReflectionMethod|\ReflectionFunction $constructor The Constructor reflector
+	 * @param array                                 $arguments   List of arguments
 	 * @throws \ReflectionException
 	 */
-	protected function loadConstructorArguments(\ReflectionMethod $constructor, array $arguments = [])
+	protected function loadConstructorArguments($definition, $constructor, array $arguments = [])
 	{
 		$parameters = $constructor->getParameters();
 		if ($constructor->isVariadic()) {
@@ -122,8 +132,99 @@ class FullAutowirePass
 
 			if ($type = ProxyHelper::getTypeHint($constructor, $param, true)) {
 				$this->load($type);
+				$rtc = $this->container->getReflectionClass($type);
+				if ($rtc && !$rtc->isAbstract() && !$rtc->isInterface() && !$rtc->isTrait()) {
+					$definition->setArgument($key, new Reference($type));
+				}
+			}
+			elseif ($value = $this->resolveInheritedValue($constructor->getDeclaringClass()->getParentClass(), $key)) {
+				// there was no type hint: List as missing and any parent classes will be checked
+				$definition->setArgument($key, $value);
 			}
 		}
+	}
+
+	/**
+	 * Attempts to resolve the value by checking the inherited classes
+	 *
+	 * @param \ReflectionClass|bool $class
+	 * @param string                $key
+	 * @return bool|Reference|null
+	 * @throws \ReflectionException
+	 */
+	protected function resolveInheritedValue($class, string $key)
+	{
+		if (false === $class) {
+			return false;
+		}
+
+		list($arguments, $params) = $this->resolveConstructorArgumentsAndParameters($class->getName());
+		if (isset($arguments[$key])) {
+			return $arguments[$key];
+		}
+
+		if (isset($params[$key])) {
+			if ($type = $params[$key]->getType()) {
+				$this->load($name = $type->getName());
+
+				return new Reference($name);
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Resolves the given classes arguments and parameters
+	 *
+	 * This caches the information as it might be used multiple times during compilation
+	 *
+	 * @param string $class
+	 * @return array
+	 * @throws \ReflectionException
+	 */
+	protected function resolveConstructorArgumentsAndParameters($class)
+	{
+		if (isset($this->classArgumentParameterCache[$class])) {
+			return $this->classArgumentParameterCache[$class];
+		}
+
+		$parentParams = [];
+		$arguments    = [];
+		if ($this->container->hasDefinition($class)) {
+			$parent      = $this->container->getDefinition($class);
+			$constructor = $this->getConstructor($parent, false);
+			$arguments   = $parent->getArguments();
+		}
+		else {
+			// handle aliases
+			if ($this->container->hasAlias($class)) {
+				$class = (string)$this->container->getAlias($class);
+				if ($this->container->hasDefinition($class) || $this->load($class)) {
+					// the container has a definition or it loaded
+					return $this->resolveConstructorArgumentsAndParameters($class);
+				}
+			}
+
+			$constructor = $this->container->getReflectionClass($class, false)->getConstructor();
+		}
+
+		$constructor && array_map(
+			function ($param) use (&$parentParams) {
+				$key                = '$' . $param->getName();
+				$parentParams[$key] = $param;
+
+				return $key;
+			},
+			$constructor->getParameters()
+		);
+
+		$this->classArgumentParameterCache[$class] = [
+			$arguments,
+			$parentParams
+		];
+
+		return $this->classArgumentParameterCache[$class];
 	}
 
 	/**
@@ -131,27 +232,33 @@ class FullAutowirePass
 	 *
 	 * @param $class
 	 * @throws \ReflectionException
+	 * @return bool Whether the class was loaded
 	 */
-	protected function load($class): void
+	protected function load($class): bool
 	{
-		if ($this->container->hasDefinition($class) ||
-			$this->container->hasAlias($class) ||
-			$this->container->has($class)
-		) {
-			return;
+		if (empty($class)) {
+			return false;
 		}
 
-		if (!class_exists($class)) {
-			return;
+		if (
+			$this->container->hasDefinition($class) ||
+			$this->container->hasAlias($class) ||
+			$this->container->has($class)
+
+		) {
+			return true;
 		}
 
 		if ($reflectionClass = $this->container->getReflectionClass($class, false)) {
+			// Leave these private to prevent abuse of the system.
+			$definition = $this->container->autowire($class, $class);
 			if ($constructor = $reflectionClass->getConstructor()) {
-				$this->loadConstructorArguments($constructor);
+				$this->loadConstructorArguments($definition, $constructor);
 
-				// Leave these private to prevent abuse of the system.
-				$this->container->autowire($class, $class);
+				return true;
 			}
 		}
+
+		return false;
 	}
 }
