@@ -40,7 +40,7 @@ class Result
 	/**
 	 * @var bool Whether or not the routing was successful
 	 */
-	protected $success;
+	protected $success = false;
 
 	/**
 	 * Create an instance representing a successful match
