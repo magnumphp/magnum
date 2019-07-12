@@ -4,7 +4,6 @@ namespace Magnum\Http\Routing;
 
 use FastRoute\DataGenerator\GroupCountBased;
 use FastRoute\RouteParser\Std;
-use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 
 class RouteCollectorTest
@@ -23,12 +22,12 @@ class RouteCollectorTest
 	public function provideTestMethods()
 	{
 		return [
-			['get'],
-			['post'],
-			['put'],
-			['patch'],
-			['delete'],
-			['options'],
+			['GET'],
+			['POST'],
+			['PUT'],
+			['PATCH'],
+			['DELETE'],
+			['OPTIONS'],
 		];
 	}
 
@@ -40,7 +39,6 @@ class RouteCollectorTest
 		list($frc, $rc) = $this->generateCollector($method, '/test/path', 'test-name', ['test::class']);
 
 		$routes = $frc->getData();
-		$method = strtoupper($method);
 
 		self::assertTrue(isset($routes[0][$method]['/test/path']));
 		self::assertEquals(['test-name', ['test::class']], $routes[0][$method]['/test/path']);
