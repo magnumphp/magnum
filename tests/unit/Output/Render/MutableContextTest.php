@@ -15,6 +15,24 @@ class MutableContextTest
 		self::assertEquals($payload, $mc->provide('test'));
 	}
 
+	public function provideGetValues()
+	{
+		return [
+			['context', ['test' => 'context']],
+			['kakaw', [], 'kakaw'],
+			[null, []]
+		];
+	}
+
+	/**
+	 * @dataProvider provideGetValues
+	 */
+	public function testGet($expected, $payload, $alt = null)
+	{
+		$mc = new MutableContext($payload);
+		self::assertEquals($expected, $mc->get('test', $alt));
+	}
+
 	public function testSet()
 	{
 		$mc = new MutableContext();
