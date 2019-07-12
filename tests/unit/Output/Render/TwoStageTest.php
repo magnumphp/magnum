@@ -10,9 +10,9 @@ class TwoStageTest
 	public function testRenderUsesLayout()
 	{
 		$e = new TwoStage(new TemplateFactory([TPL_PATH]));
-		$o = $e->render('test', ['var' => 'output']);
+		$o = $e->render('test', ['var' => 'output', 'other' => 'var']);
 
-		self::assertEquals('layout:output', $o);
+		self::assertEquals('layout:outputvar', $o);
 	}
 
 	public function testRender()

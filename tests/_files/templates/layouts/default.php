@@ -1,1 +1,1 @@
-layout:<?= $content ?>
+layout:<?= $content ?><?= $this->other ?>

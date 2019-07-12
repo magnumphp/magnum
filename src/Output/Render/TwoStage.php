@@ -63,7 +63,7 @@ class TwoStage
 
 			$this->layoutDone = true;
 
-			return parent::render($layout, ['content' => $output]);
+			return parent::render($layout, array_merge($data, ['content' => $output]));
 		}
 
 		return $output;
