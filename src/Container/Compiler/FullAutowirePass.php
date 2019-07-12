@@ -43,7 +43,6 @@ class FullAutowirePass
 					$this->resolveFactoryReferences($value);
 				}
 				catch (\Exception $e) {
-					var_dump($value);
 					throw $e;
 				}
 			}
@@ -137,9 +136,16 @@ class FullAutowirePass
 					$definition->setArgument($key, new Reference($type));
 				}
 			}
-			elseif ($value = $this->resolveInheritedValue($constructor->getDeclaringClass()->getParentClass(), $key)) {
-				// there was no type hint: List as missing and any parent classes will be checked
-				$definition->setArgument($key, $value);
+			else {
+				$parentClass = $constructor->getDeclaringClass()->getParentClass();
+				if ($parentClass === false) {
+					$parentClass = $this->container->getReflectionClass($definition->getClass(), false)->getParentClass();
+				}
+
+				if ($value = $this->resolveInheritedValue($parentClass, $key)) {
+					// there was no type hint: List as missing and any parent classes will be checked
+					$definition->setArgument($key, $value);
+				}
 			}
 		}
 	}
@@ -159,6 +165,7 @@ class FullAutowirePass
 		}
 
 		list($arguments, $params) = $this->resolveConstructorArgumentsAndParameters($class->getName());
+
 		if (isset($arguments[$key])) {
 			return $arguments[$key];
 		}
