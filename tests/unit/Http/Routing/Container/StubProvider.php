@@ -7,7 +7,7 @@ use Magnum\Http\Routing\RouteProvider;
 class StubProvider
 	implements RouteProvider
 {
-	public function register(RouteCollector $collector)
+	public function routes(RouteCollector $collector)
 	{
 		$collector->get('/', 'home', 'home');
 	}

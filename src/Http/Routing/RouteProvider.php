@@ -19,5 +19,5 @@ interface RouteProvider
 	 * @param RouteCollector $collector
 	 * @return mixed
 	 */
-	public function register(RouteCollector $collector);
+	public function routes(RouteCollector $collector);
 }

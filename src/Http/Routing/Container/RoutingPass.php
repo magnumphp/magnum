@@ -100,7 +100,7 @@ class RoutingPass
 		foreach ($container->findTaggedServiceIds(self::TAG_NAME, true) as $id => $tags) {
 			$provider = $container->has($id) ? $container->get($id) : new $id;
 			if ($provider instanceof RouteProvider) {
-				$provider->register($routeCollector);
+				$provider->routes($routeCollector);
 			}
 		}
 
