@@ -44,7 +44,7 @@ class ExceptionHandler
 			$this->logger->error($e);
 		}
 
-		$response = $this->responseFactory->createResponse(500, "There was an error processing your request");
+		$response = $this->createResponse(500, "There was an error processing your request");
 
 		if ($this->sendExceptionMessage) {
 			$response = $response->withHeader('x-magnum-error', $e->getMessage());
