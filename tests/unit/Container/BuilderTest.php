@@ -116,11 +116,15 @@ class BuilderTest
 		$stubPath = __DIR__ . '/Stub';
 		$builder = new Builder();
 
-		$classes = [];
+		$expected = [];
 		foreach (new \GlobIterator("$stubPath/*.php") as $file) {
-			$classes[] = __NAMESPACE__ . "\\Stub\\" . $file->getBaseName('.php');
+			$expected[] = __NAMESPACE__ . "\\Stub\\" . $file->getBaseName('.php');
 		}
-		self::assertEquals($classes, $builder->findClassesInPath($stubPath));
+
+		$actual = $builder->findClassesInPath($stubPath);
+		sort($actual);
+		sort($expected);
+		self::assertEquals($expected, $actual);
 	}
 
 	public function testBuilderReturnsContainerBuilderInstance()
