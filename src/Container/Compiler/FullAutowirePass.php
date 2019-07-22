@@ -139,7 +139,8 @@ class FullAutowirePass
 			else {
 				$parentClass = $constructor->getDeclaringClass()->getParentClass();
 				if ($parentClass === false) {
-					$parentClass = $this->container->getReflectionClass($definition->getClass(), false)->getParentClass();
+					$parentClass = $this->container->getReflectionClass($definition->getClass(), false)
+												   ->getParentClass();
 				}
 
 				if ($value = $this->resolveInheritedValue($parentClass, $key)) {
@@ -238,8 +239,8 @@ class FullAutowirePass
 	 * Loads the class as an autowire
 	 *
 	 * @param $class
-	 * @throws \ReflectionException
 	 * @return bool Whether the class was loaded
+	 * @throws \ReflectionException
 	 */
 	protected function load($class): bool
 	{

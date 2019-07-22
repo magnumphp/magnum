@@ -80,8 +80,8 @@ class TestCase
 	 */
 	public function buildRequest($method, $path): ServerRequestInterface
 	{
-		$request        = $this->createMock(ServerRequestInterface::class);
-		$uri            = $this->createMock(UriInterface::class);
+		$request = $this->createMock(ServerRequestInterface::class);
+		$uri     = $this->createMock(UriInterface::class);
 
 		$uri->method('getPath')->willReturn($path);
 		$request->attrs = [];
@@ -93,7 +93,8 @@ class TestCase
 				$request->attrs[$name] = $value;
 
 				return $request;
-			});
+			}
+		);
 
 		return $request;
 	}

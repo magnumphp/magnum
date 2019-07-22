@@ -44,5 +44,4 @@ class ActionHandlerTest
 
 		self::assertStatusCode(333, $mw->process($request));
 	}
-
 }
