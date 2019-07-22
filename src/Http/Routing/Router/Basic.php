@@ -59,7 +59,7 @@ class Basic
 			);
 		}
 
-		return Result::fromRouteFailure($path, $result[1] ?? [Route::METHOD_ANY]);
+		return Result::fromRouteFailure($path, $result[1] ?? []);
 	}
 
 	/**

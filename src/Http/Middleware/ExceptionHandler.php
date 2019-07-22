@@ -1,10 +1,13 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Middleware\ExceptionHandler
+ */
+
 namespace Magnum\Http\Middleware;
 
 use Exception;
-use Slim\Http\Headers;
-use Slim\Http\Response;
 use Throwable;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
@@ -23,32 +26,29 @@ class ExceptionHandler
 {
 	use IsMiddleware;
 
+	/**
+	 * @var bool Whether or not the exceptions message should be passed in the header
+	 */
 	protected $sendExceptionMessage = false;
+
+	public function __construct($sendExceptionMessage = false)
+	{
+		$this->sendExceptionMessage = $sendExceptionMessage;
+	}
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler): ResponseInterface
 	{
 		try {
-			return $handler->handle($request);
+			$response = $handler->handle($request);
 		}
-		catch (Exception $e) {
-			return $this->handleException($request, $e);
-		}
-		catch (Throwable $e) {
-			return $this->handleException($request, $e);
-		}
-	}
+		catch (Exception | Throwable $e) {
+			$response = $this->createResponse(500)->withStatus(500, "There was an error processing your request");
 
-	protected function handleException($request, $e)
-	{
-		if (isset($this->logger)) {
-			$this->logger->error($e);
+			if ($this->sendExceptionMessage) {
+				$response = $response->withHeader('x-magnum-error', $e->getMessage());
+			}
 		}
 
-		$response = $this->createResponse(500, "There was an error processing your request");
-
-		if ($this->sendExceptionMessage) {
-			$response = $response->withHeader('x-magnum-error', $e->getMessage());
-		}
 		return $response;
 	}
 }

@@ -1,24 +1,30 @@
 <?php
 
-namespace Magnum\Http\Middleware;
+namespace Magnum\Fixture\Middleware;
 
+use Magnum\Http\Middleware\IsMiddleware;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
-class Lambda
+class Test
 	implements MiddlewareInterface
 {
-	protected $lambda;
+	use IsMiddleware;
 
-	public function __construct($lambda)
-	{
-		$this->lambda = $lambda;
-	}
+	public $did;
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler = null): ResponseInterface
 	{
-		return call_user_func($this->lambda, $request);
+		if ($handler) {
+			$this->did = 'handler';
+
+			return $handler->handle($request);
+		}
+
+		$this->did = 'response';
+
+		return $this->createResponse(333);
 	}
 }

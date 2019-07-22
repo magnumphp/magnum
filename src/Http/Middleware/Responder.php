@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Middleware\Responder
+ */
+
 namespace Magnum\Http\Middleware;
 
 use Psr\Http\Message\ResponseInterface;
@@ -7,28 +12,38 @@ use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 
+/**
+ * Middleware to handle sending the response
+ */
+
+/**
+ * Slim Framework (https://slimframework.com)
+ *
+ * @license https://github.com/slimphp/Slim/blob/4.x/LICENSE.md (MIT License)
+ */
 class Responder
 	implements MiddlewareInterface
 {
+	use IsMiddleware;
+
 	const DEFAULT_CHUNK_SIZE = 4096;
+
+	/**
+	 * @var int The response chunk size
+	 */
 	protected $responseChunkSize = self::DEFAULT_CHUNK_SIZE;
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler = null): ResponseInterface
 	{
-		if ($handler) {
-			$response = $handler->handle($request);
+		$response = $handler
+			? $handler->handle($request)
+			: $this->createResponse(500);
+
+		if (strtoupper($request->getMethod()) === 'HEAD') {
+			$response = $response->withBody($this->createResponse(200)->getBody());
 		}
 
 		return $this->send($response);
-	}
-
-	protected function send(ResponseInterface $response = null): ResponseInterface
-	{
-		if ($this->isEmptyResponse($response)) {
-			return $response->withoutHeader('Content-Type')->withoutHeader('Content-Length');
-		}
-
-		return $this->respond($response);
 	}
 
 	/**
@@ -37,14 +52,16 @@ class Responder
 	 * @param ResponseInterface $response
 	 * @return ResponseInterface
 	 */
-	public function respond(ResponseInterface $response)
+	protected function respond(ResponseInterface $response)
 	{
 		// Send response
 		if (!headers_sent()) {
 			// Headers
 			foreach ($response->getHeaders() as $name => $values) {
+				$first = true;
 				foreach ($values as $value) {
-					header(sprintf('%s: %s', $name, $value), false);
+					header(sprintf('%s: %s', $name, $value), $first);
+					$first = false;
 				}
 			}
 
@@ -52,13 +69,16 @@ class Responder
 			// See https://github.com/slimphp/Slim/issues/1730
 
 			// Status
+			$statusCode = $response->getStatusCode();
 			header(
 				sprintf(
 					'HTTP/%s %s %s',
 					$response->getProtocolVersion(),
-					$response->getStatusCode(),
+					$statusCode,
 					$response->getReasonPhrase()
-				)
+				),
+				true,
+				$statusCode
 			);
 		}
 
@@ -68,19 +88,18 @@ class Responder
 			if ($body->isSeekable()) {
 				$body->rewind();
 			}
-			$chunkSize     = $this->responseChunkSize;
-			$contentLength = $response->getHeaderLine('Content-Length');
+
+			$contentLength = (int)$response->getHeaderLine('Content-Length');
 			if (!$contentLength) {
 				$contentLength = $body->getSize();
 			}
 
-			if (isset($contentLength)) {
-				$amountToRead = $contentLength;
-				while ($amountToRead > 0 && !$body->eof()) {
-					$data = $body->read(min($chunkSize, $amountToRead));
+			if ($contentLength) {
+				while ($contentLength > 0 && !$body->eof()) {
+					$data = $body->read(min($this->responseChunkSize, $contentLength));
 					echo $data;
 
-					$amountToRead -= strlen($data);
+					$contentLength -= strlen($data);
 
 					if (connection_status() != CONNECTION_NORMAL) {
 						break;
@@ -89,7 +108,7 @@ class Responder
 			}
 			else {
 				while (!$body->eof()) {
-					echo $body->read($chunkSize);
+					echo $body->read($this->responseChunkSize);
 					if (connection_status() != CONNECTION_NORMAL) {
 						break;
 					}
@@ -98,6 +117,22 @@ class Responder
 		}
 
 		return $response;
+	}
+
+	/**
+	 * Send the response if it's not empty
+	 *
+	 * @param ResponseInterface|null $response
+	 * @return ResponseInterface
+	 */
+	protected function send(ResponseInterface $response): ResponseInterface
+	{
+		if ($this->isEmptyResponse($response)) {
+			$response = $response->withoutHeader('Content-Type')
+								 ->withoutHeader('Content-Length');
+		}
+
+		return $this->respond($response);
 	}
 
 	/**
@@ -114,7 +149,10 @@ class Responder
 		if (method_exists($response, 'isEmpty')) {
 			return $response->isEmpty();
 		}
+		else {
+			$size = $response->getBody()->getSize();
+		}
 
-		return in_array($response->getStatusCode(), [204, 205, 304]);
+		return $size === 0 || in_array($response->getStatusCode(), [204, 205, 304]);
 	}
 }

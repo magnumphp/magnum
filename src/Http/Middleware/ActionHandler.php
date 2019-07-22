@@ -1,16 +1,18 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Middleware\ActionHandler
+ */
+
 namespace Magnum\Http\Middleware;
 
+use Magnum\Http\Routing\Route;
 use Psr\Http\Message\ResponseFactoryInterface;
-use Psr\Container\ContainerInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
-use Slim\Exception\HttpNotFoundException;
-use Slim\Interfaces\RouteInterface;
-use Slim\Route;
 
 /**
  * ADR Request Handler
@@ -22,18 +24,29 @@ use Slim\Route;
 class ActionHandler
 	implements MiddlewareInterface
 {
-	/**
-	 * @var RequestHandlerInterface
-	 */
-	protected $action;
+	use IsMiddleware;
 
-	public function __construct($action)
+	/**
+	 * @var PipewareFactory
+	 */
+	protected $pipewareFactory;
+
+	public function __construct(PipewareFactory $pipewareFactory, ResponseFactoryInterface $responseFactory)
 	{
-		$this->action = $action;
+		$this->pipewareFactory = $pipewareFactory;
+		$this->responseFactory = $responseFactory;
 	}
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler = null): ResponseInterface
 	{
-		return $this->action->handle($request);
+		/** @var Route $route */
+		$route = $request->getAttribute(Routing::ATTRIBUTE);
+		if (empty($route)) {
+			return $this->createResponse(404);
+		}
+
+		return $this->pipewareFactory
+			->newContainerInstance($route->middleware())
+			->handle($request);
 	}
 }

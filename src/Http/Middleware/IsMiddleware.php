@@ -1,18 +1,15 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Middleware\IsMiddleware
+ */
+
 namespace Magnum\Http\Middleware;
 
-use Exception;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Middlewares\Utils\Factory;
-use Slim\Http\Body;
-use Slim\Http\Headers;
-use Slim\Http\Response;
-use Throwable;
 use Psr\Http\Message\ResponseInterface;
-use Psr\Http\Message\ServerRequestInterface;
-use Psr\Http\Server\MiddlewareInterface;
-use Psr\Http\Server\RequestHandlerInterface;
 
 /**
  * Trait IsMiddleware
@@ -26,12 +23,23 @@ trait IsMiddleware
 	 */
 	protected $responseFactory;
 
+	/**
+	 * Sets the response factory that will be used
+	 *
+	 * @param ResponseFactoryInterface $responseFactory
+	 */
 	public function setResponseFactory(ResponseFactoryInterface $responseFactory)
 	{
 		$this->responseFactory = $responseFactory;
 	}
 
-	protected function createResponse($code)
+	/**
+	 * Returns the factory created Response object
+	 *
+	 * @param int $code The HTTP status code
+	 * @return ResponseInterface The Factory created Response object
+	 */
+	protected function createResponse($code): ResponseInterface
 	{
 		return isset($this->responseFactory)
 			? $this->responseFactory->createResponse($code)
