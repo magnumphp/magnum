@@ -88,7 +88,7 @@ class Result
 	 */
 	public function isFailure(): bool
 	{
-		return (!$this->success);
+		return $this->success === false;
 	}
 
 	/**
@@ -96,7 +96,7 @@ class Result
 	 */
 	public function isMethodFailure(): bool
 	{
-		return !($this->success || !$this->allowedMethods);
+		return $this->success === false && !empty($this->allowedMethods);
 	}
 
 	/**
