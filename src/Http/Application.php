@@ -3,9 +3,14 @@
 namespace Magnum\Http;
 
 use Pipeware\Stack;
-use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
+use Psr\Http\Message\ServerRequestInterface;
 
+/**
+ * The Magnum HTTP application
+ *
+ * @package Magnum\Http
+ */
 class Application
 {
 	/**
@@ -14,39 +19,31 @@ class Application
 	protected $middleware;
 
 	/**
-	 * @var RequestInterface
+	 * @var ServerRequestInterface
 	 */
 	protected $request;
 
-	public function __construct(Stack $middleware, RequestInterface $request = null)
+	public function __construct(Stack $middleware, ?ServerRequestInterface $request = null)
 	{
 		$this->middleware = $middleware;
 		$this->request    = $request;
 	}
 
-	public function add($middleware): self
-	{
-		$this->middleware->push($middleware);
-
-		return $this;
-	}
-
-	public function replace($stageName, $replacement): self
-	{
-		$this->middleware->replace($stageName, $replacement);
-
-		return $this;
-	}
-
-	public function remove($stageName)
-	{
-		$this->middleware->remove($stageName);
-	}
-
-	public function run(RequestInterface $request = null): ResponseInterface
+	/**
+	 * Runs the application
+	 *
+	 * This requires that the request object be provided in the constructor or passed in.
+	 *
+	 * Based on the middleware that was registered, it's possible the response has already been
+	 * sent to the client.
+	 *
+	 * @param ServerRequestInterface|null $request
+	 * @return ResponseInterface The generated response
+	 */
+	public function run(?ServerRequestInterface $request = null): ResponseInterface
 	{
 		if (!$request && !$this->request) {
-			throw new \InvalidArgumentException("A " . RequestInterface::class . ' object is required.');
+			throw new \InvalidArgumentException("A " . ServerRequestInterface::class . ' object is required.');
 		}
 
 		return $this->middleware->handle($request ?: $this->request);
