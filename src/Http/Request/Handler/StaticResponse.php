@@ -5,7 +5,7 @@
  * Contains Magnum\Http\RequestHandler\StaticResponse
  */
 
-namespace Magnum\Http\RequestHandler;
+namespace Magnum\Http\Request\Handler;
 
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;

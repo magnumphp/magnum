@@ -7,7 +7,7 @@
 
 namespace Magnum\Http\Middleware;
 
-use Magnum\Http\RequestHandler\StaticResponse;
+use Magnum\Http\Request\Handler\StaticResponse;
 use Magnum\Http\Routing\Router;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
