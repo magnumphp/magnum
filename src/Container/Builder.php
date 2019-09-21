@@ -50,18 +50,18 @@ class Builder
 	{
 		$this->container = $this->resolveContainerBuilder($parameterBag);
 
-		// Ensure full auto-wire is set up
-		$this->container->addCompilerPass(
-			new Compiler\FullAutowirePass(),
-			PassConfig::TYPE_OPTIMIZE,
-			10
-		);
-
 		// we want this to happen after the defaults are resolved
 		$this->addCompilerPass(
 			$this->defaultParametersResolver = new Compiler\ResolveDefaultParameters(),
 			PassConfig::TYPE_BEFORE_OPTIMIZATION,
 			0
+		);
+
+		// Ensure full auto-wire is set up
+		$this->container->addCompilerPass(
+			new Compiler\FullAutowirePass($this->defaultParametersResolver),
+			PassConfig::TYPE_OPTIMIZE,
+			10
 		);
 	}
 
