@@ -27,6 +27,16 @@ class FullAutowirePass
 	protected $classArgumentParameterCache = [];
 
 	/**
+	 * @var ResolveDefaultParameters
+	 */
+	protected $defaultParameters;
+
+	public function __construct(ResolveDefaultParameters $defaultParameters)
+	{
+		$this->defaultParameters = $defaultParameters;
+	}
+
+	/**
 	 * @param mixed $value
 	 * @param bool  $isRoot
 	 * @return mixed
@@ -63,9 +73,15 @@ class FullAutowirePass
 		if ($reflectionClass = $this->container->getReflectionClass($class, false)) {
 			if ($reflectionMethod = $reflectionClass->getMethod($method)) {
 				$params = $reflectionMethod->getParameters();
+				$args   = $definition->getArguments();
 				foreach ($params as $param) {
-					if ($param->hasType()) {
-						$this->load($type = $param->getType()->getName());
+					$name = '$' . $param->getName();
+					if (array_key_exists($name, $args) || array_key_exists($param->getPosition(), $args)) {
+						continue;
+					}
+
+					if ($type = ProxyHelper::getTypeHint($reflectionMethod, $param, true)) {
+						$this->load($type);
 						$definition->setArgument($param->getPosition(), new Reference($type));
 					}
 				}
@@ -143,7 +159,7 @@ class FullAutowirePass
 												   ->getParentClass();
 				}
 
-				if ($value = $this->resolveInheritedValue($parentClass, $key)) {
+				if ($value = $this->resolveInheritedValue($parentClass, $key) ?: $this->defaultParameters->get($key)) {
 					// there was no type hint: List as missing and any parent classes will be checked
 					$definition->setArgument($key, $value);
 				}
@@ -172,11 +188,9 @@ class FullAutowirePass
 		}
 
 		if (isset($params[$key])) {
-			if ($type = $params[$key]->getType()) {
-				$this->load($name = $type->getName());
+			$this->load($params[$key]);
 
-				return new Reference($name);
-			}
+			return new Reference($params[$key]);
 		}
 
 		return null;
@@ -218,9 +232,9 @@ class FullAutowirePass
 		}
 
 		$constructor && array_map(
-			function ($param) use (&$parentParams) {
+			function ($param) use (&$parentParams, &$constructor) {
 				$key                = '$' . $param->getName();
-				$parentParams[$key] = $param;
+				$parentParams[$key] = ProxyHelper::getTypeHint($constructor, $param, true);
 
 				return $key;
 			},

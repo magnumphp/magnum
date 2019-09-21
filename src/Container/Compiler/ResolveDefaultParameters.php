@@ -34,6 +34,18 @@ class ResolveDefaultParameters
 	}
 
 	/**
+	 * Return the parameter value
+	 *
+	 * @param string     $id
+	 * @param mixed|null $default
+	 * @return mixed|null
+	 */
+	public function get($id, $default = null)
+	{
+		return $this->params[$id] ?? $default;
+	}
+
+	/**
 	 * {@inheritdoc}
 	 */
 	public function process(ContainerBuilder $container)
