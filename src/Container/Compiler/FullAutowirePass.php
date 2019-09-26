@@ -8,6 +8,7 @@
 namespace Magnum\Container\Compiler;
 
 use Symfony\Component\DependencyInjection\Compiler\AbstractRecursivePass;
+use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\AutowiringFailedException;
 use Symfony\Component\DependencyInjection\LazyProxy\ProxyHelper;
@@ -31,9 +32,27 @@ class FullAutowirePass
 	 */
 	protected $defaultParameters;
 
+	/**
+	 * @var array List of arguments that could be nullable
+	 */
+	protected $nullables = [];
+
 	public function __construct(ResolveDefaultParameters $defaultParameters)
 	{
 		$this->defaultParameters = $defaultParameters;
+	}
+
+	public function process(ContainerBuilder $container)
+	{
+		parent::process($container);
+
+		foreach ($this->nullables as $nullable) {
+			/** @var \ReflectionParameter $param */
+			list ($definition, $type, $key, $param) = $nullable;
+			if ($container->hasDefinition($type) === false) {
+				$definition->setArgument($key, $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null);
+			}
+		}
 	}
 
 	/**
@@ -137,6 +156,7 @@ class FullAutowirePass
 		}
 
 		foreach ($parameters as $idx => $param) {
+			unset($value);
 			$key = '$' . $param->getName();
 			if ((array_key_exists($idx, $arguments) && '' !== $arguments[$idx]) ||
 				isset($arguments[$key]) ||
@@ -146,9 +166,16 @@ class FullAutowirePass
 			}
 
 			if ($type = ProxyHelper::getTypeHint($constructor, $param, true)) {
-				$this->load($type);
-				$rtc = $this->container->getReflectionClass($type);
-				if ($rtc && !$rtc->isAbstract() && !$rtc->isInterface() && !$rtc->isTrait()) {
+				if ($this->load($type) === false) {
+					if ($param->allowsNull()) {
+						$definition->setArgument($key, null);
+					}
+					if ($type === 'App\Http\Action\PhpInput') {
+						var_dump($definition);
+						die;
+					}
+				}
+				else {
 					$definition->setArgument($key, new Reference($type));
 				}
 			}
@@ -272,6 +299,11 @@ class FullAutowirePass
 		}
 
 		if ($reflectionClass = $this->container->getReflectionClass($class, false)) {
+			if ($reflectionClass->isInterface() || $reflectionClass->isAbstract() || $reflectionClass->isTrait()) {
+				// do not try to autowire these
+				return false;
+			}
+
 			// Leave these private to prevent abuse of the system.
 			$definition = $this->container->autowire($class, $class);
 			if ($constructor = $reflectionClass->getConstructor()) {

@@ -46,6 +46,15 @@ class ResolveDefaultParameters
 	}
 
 	/**
+	 * @param string $id The name of the service
+	 * @return bool True if the service exists, False otherwise
+	 */
+	public function has($id): bool
+	{
+		return array_key_exists($id, $this->params);
+	}
+
+	/**
 	 * {@inheritdoc}
 	 */
 	public function process(ContainerBuilder $container)
