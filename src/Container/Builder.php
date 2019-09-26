@@ -15,6 +15,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Finder\Finder;
 
 /**
@@ -303,6 +304,28 @@ class Builder
 	}
 
 	/**
+	 * Registers the child in place of  the parent, and makes the parent the first argument of the child
+	 *
+	 * NOTE: Child services can be configured from the base class and the FullAutowirePass will handle it for you
+	 *
+	 * @param string $parent
+	 * @param string $child
+	 * @return Definition
+	 * @throws \Exception
+	 */
+	public function decorate(string $parent, string $child): Definition
+	{
+		$parentObject = $this->container->hasDefinition($parent)
+			? $this->container->getDefinition($parent)
+			: $this->register($parent);
+
+		$this->container->setDefinition($parentKey = "{$child}.parent", $parentObject);
+
+		return $this->register($parent, $child)
+					->setArgument(0, new Reference($parentKey));
+	}
+
+	/**
 	 * Convenience function to register a class as a singleton (shared instance)
 	 *
 	 * @param string $id    The factory identifier
@@ -334,7 +357,7 @@ class Builder
 	protected function resolveDumperParameters(string $class): array
 	{
 		return [
-			'class'      => $class
+			'class' => $class
 		];
 	}
 
