@@ -43,7 +43,8 @@ class ServiceProvider
 					[
 						'$app'     => new Reference(App::class),
 						'$request' => new Reference(ServerRequestInterface::class)
-					])
+					]
+				)
 				->setPublic(true);
 	}
 }

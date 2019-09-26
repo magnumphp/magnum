@@ -8,6 +8,18 @@ use Phrender\Template\Factory;
 class ViewTest
 	extends TestCase
 {
+	protected $escaper;
+	public function setUp()
+	{
+		$this->escaper = new class()
+		{
+			public function escape($str)
+			{
+				return "%{$str}%";
+			}
+		};
+	}
+
 	public function provideInvalidFileNames()
 	{
 		return [
@@ -29,13 +41,7 @@ class ViewTest
 	public function testRenderEscapes()
 	{
 		$view          = $this->buildView('test');
-		$view->escaper = new class()
-		{
-			function escape($str)
-			{
-				return "%{$str}%";
-			}
-		};
+		$view->escaper = $this->escaper;
 
 		self::assertEquals('%test%', $view->render(new MutableContext(['var' => 'test'])));
 	}
@@ -43,13 +49,7 @@ class ViewTest
 	public function testMagicGetEscapes()
 	{
 		$view          = $this->buildView('test-get');
-		$view->escaper = new class()
-		{
-			function escape($str)
-			{
-				return "%{$str}%";
-			}
-		};
+		$view->escaper = $this->escaper;
 
 		self::assertEquals('%test%', $view->render(new MutableContext(['var' => 'test'])));
 	}
@@ -57,13 +57,7 @@ class ViewTest
 	public function testRawReturnsRealValue()
 	{
 		$view          = $this->buildView('test-raw');
-		$view->escaper = new class()
-		{
-			function escape($str)
-			{
-				return "%{$str}%";
-			}
-		};
+		$view->escaper = $this->escaper;
 
 		self::assertEquals('test', $view->render(new MutableContext(['var' => 'test'])));
 	}

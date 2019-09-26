@@ -14,15 +14,15 @@ use Slim\Http\ServerRequest as SlimServerRequest;
 class ServerRequest
 	extends SlimServerRequest
 {
-	protected $_parsedBody;
-	protected $_queryParams;
-	protected $_mediaType;
-	protected $_mediaTypeParams;
-	protected $_params;
+	protected $cachedParsedBody;
+	protected $cachedQueryParams;
+	protected $cachedMediaType;
+	protected $cachedMediaTypeParams;
+	protected $cachedParams;
 
 	public function __get($name)
 	{
-		$prop = "_{$name}";
+		$prop = "cached{$name}";
 		if (isset($this->$prop)) {
 			return $this->$prop;
 		}
@@ -35,26 +35,26 @@ class ServerRequest
 
 	public function getParsedBody()
 	{
-		return $this->_parsedBody ?? ($this->_parsedBody = parent::getParsedBody());
+		return $this->cachedParsedBody ?? ($this->cachedParsedBody = parent::getParsedBody());
 	}
 
 	public function getQueryParams(): array
 	{
-		return $this->_queryParams ?? ($this->_queryParams = parent::getQueryParams());
+		return $this->cachedQueryParams ?? ($this->cachedQueryParams = parent::getQueryParams());
 	}
 
 	public function getMediaType(): ?string
 	{
-		return $this->_mediaType ?? ($this->_mediaType = parent::getMediaType());
+		return $this->cachedMediaType ?? ($this->cachedMediaType = parent::getMediaType());
 	}
 
 	public function getMediaTypeParams(): array
 	{
-		return $this->_mediaTypeParams ?? ($this->_mediaTypeParams = parent::getMediaTypeParams());
+		return $this->cachedMediaTypeParams ?? ($this->cachedMediaTypeParams = parent::getMediaTypeParams());
 	}
 
 	public function getParams(): array
 	{
-		return $this->_params ?? ($this->_params = parent::getParams());
+		return $this->cachedParams ?? ($this->cachedParams = parent::getParams());
 	}
 }

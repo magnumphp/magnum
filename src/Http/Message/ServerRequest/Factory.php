@@ -45,7 +45,6 @@ class Factory
 						 ->withQueryParams($globals['_GET'] ?? []);
 
 		// PSR-7 doesn't have a bulk modifier for headers... and we can't be 100% certain an implementation does
-		// @TODO determine the
 		foreach ($server as $key => $value) {
 			if (!isset($value)) {
 				continue;

@@ -23,6 +23,11 @@ class TwoStage
 	protected $layout = 'default';
 
 	/**
+	 * @var bool Whether or not the layout has been rendered already
+	 */
+	protected $layoutDone = false;
+
+	/**
 	 * Changes the layout in use
 	 *
 	 * @param string $layout

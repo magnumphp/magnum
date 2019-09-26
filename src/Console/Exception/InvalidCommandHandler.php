@@ -19,7 +19,7 @@ class InvalidCommandHandler
 {
 	public function __construct($handler)
 	{
-		$this->message = "Handler must be a callable or instanceof " . CommandHandler::class . ". Received " .
-			(is_object($handler) ? get_class($handler) : gettype($handler));
+		parent::__construct("Handler must be a callable or instanceof " . CommandHandler::class . ". Received " .
+							(is_object($handler) ? get_class($handler) : gettype($handler)));
 	}
 }
