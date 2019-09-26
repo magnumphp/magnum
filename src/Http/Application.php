@@ -5,6 +5,7 @@ namespace Magnum\Http;
 use Pipeware\Stack;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Slim\App;
 
 /**
  * The Magnum HTTP application
@@ -14,19 +15,19 @@ use Psr\Http\Message\ServerRequestInterface;
 class Application
 {
 	/**
-	 * @var Stack
+	 * @var App
 	 */
-	protected $middleware;
+	protected $slim;
 
 	/**
 	 * @var ServerRequestInterface
 	 */
 	protected $request;
 
-	public function __construct(Stack $middleware, ?ServerRequestInterface $request = null)
+	public function __construct(App $slim, ?ServerRequestInterface $request = null)
 	{
-		$this->middleware = $middleware;
-		$this->request    = $request;
+		$this->slim    = $slim;
+		$this->request = $request;
 	}
 
 	/**
@@ -46,6 +47,6 @@ class Application
 			throw new \InvalidArgumentException("A " . ServerRequestInterface::class . ' object is required.');
 		}
 
-		return $this->middleware->handle($request ?: $this->request);
+		return $this->slim->handle($request ?? $this->request);
 	}
 }
