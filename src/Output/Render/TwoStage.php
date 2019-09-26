@@ -46,7 +46,7 @@ class TwoStage
 	public function reset()
 	{
 		$this->depth = 0;
-		unset($this->layoutDone);
+		$this->layoutDone = false;
 	}
 
 	/**
@@ -63,7 +63,7 @@ class TwoStage
 		$view   = $template{0} === '/' ? $template : "views/{$template}";
 		$output = parent::render($view, $data);
 
-		if (isset($this->layout) && --$this->depth === 0 && !isset($this->layoutDone)) {
+		if (isset($this->layout) && --$this->depth === 0 && $this->layoutDone === false) {
 			$layout = $this->layout{0} === '/' ? $this->layout : "layouts/{$this->layout}";
 
 			$this->layoutDone = true;
