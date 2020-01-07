@@ -6,6 +6,7 @@ use Magnum\Container\Stub\BadConstructorC;
 use Magnum\Container\Stub\ConstructorA;
 use Magnum\Container\Stub\ConstructorB;
 use Magnum\Container\Stub\ConstructorC;
+use Magnum\Container\Stub\DecorateA;
 use Magnum\Container\Stub\StubProvider;
 use Magnum\Container\Stub\StubProviderWithSubProvider;
 use Magnum\Fixture\TestProxy;
@@ -14,6 +15,7 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
+use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\DependencyInjection\Tests\Compiler\ExtensionCompilerPassTest;
 use Symfony\Component\Finder\Finder;
 
@@ -224,5 +226,66 @@ class BuilderTest
 		$builder->proxy('TestProxy', TestProxy::class);
 
 		self::assertEquals(['TestProxy' => TestProxy::class], $builder->container()->getParameter('proxies'));
+	}
+
+	public function testModifiers()
+	{
+		$builder = new Builder();
+		$builder->modifier(ConstructorA::class, function (Definition $definition) {
+			$definition->setPublic(true)->addMethodCall('modify', ['k']);
+		});
+
+		$builder->register(ConstructorA::class);
+
+		self::assertTrue($builder->container()->get(ConstructorA::class)->modified);
+	}
+
+	public function testModifiersFollowAliases()
+	{
+		$builder = new Builder();
+		$builder->modifier('kakaw', function (Definition $definition) {
+			// the fact we will get it later means this is called
+			$definition->setPublic(true)->addMethodCall('modify', ['k']);
+		});
+
+		$builder->register(ConstructorA::class);
+		$builder->alias(ConstructorA::class, 'kakaw');
+
+		$container = $builder->container();
+
+		$a = $container->get('kakaw');
+		$b = $container->get(ConstructorA::class);
+		self::assertSame($a, $b);
+	}
+
+	public function testReference()
+	{
+		$builder = new Builder();
+
+		self::assertInstanceOf(Reference::class, $ref = $builder->reference(ConstructorA::class));
+		self::assertInstanceOf(Definition::class, $builder->get(ConstructorA::class));
+	}
+
+	public function testDecorate()
+	{
+		$builder = new Builder();
+		$builder->register(ConstructorA::class)->setPublic(true);
+
+		$builder->decorate(ConstructorA::class, DecorateA::class);
+
+		self::assertEmpty($builder->get(ConstructorA::class)->getMethodCalls());
+		self::assertInstanceOf(DecorateA::class, $builder->container()->get(ConstructorA::class));
+	}
+
+	public function testDecorateUsesExistingDefinitionForDecorator()
+	{
+		$builder = new Builder();
+		$builder->register(ConstructorA::class)->setPublic(true);
+		$builder->register(DecorateA::class)->addMethodCall('modify', ['kakaw']);
+
+		$builder->decorate(ConstructorA::class, DecorateA::class);
+
+		self::assertNotEmpty($builder->get(ConstructorA::class)->getMethodCalls());
+		self::assertInstanceOf(DecorateA::class, $builder->container()->get(ConstructorA::class));
 	}
 }

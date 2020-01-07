@@ -43,6 +43,12 @@ class Builder
 	protected $proxies = [];
 
 	/**
+	 * @var array List of modifiers that should occur just before the container is built,
+	 *            but after all other registration is complete
+	 */
+	protected $modifiers = [];
+
+	/**
 	 * @var Compiler\ResolveDefaultParameters
 	 */
 	protected $defaultParametersResolver;
@@ -100,6 +106,18 @@ class Builder
 	public function container(): ContainerInterface
 	{
 		$this->defaultParametersResolver->param('proxies', $this->proxies);
+		foreach ($this->modifiers as $class => $modifiers) {
+			if ($this->container->hasAlias($class)) {
+				$class = (string)$this->container->getAlias($class);
+			}
+
+			if ($this->container->hasDefinition($class)) {
+				$definition = $this->container->getDefinition(($class));
+				foreach ($modifiers as $modifier) {
+					$modifier($definition);
+				}
+			}
+		}
 
 		if ($this->container->isCompiled() === false) {
 			$this->container->compile();
@@ -121,7 +139,19 @@ class Builder
 		file_put_contents($file, (new PhpDumper($this->container))->dump($this->resolveDumperParameters($class)));
 	}
 
-	// services
+	/**
+	 * @param string $class The class to get a reference to
+	 *
+	 * @return Reference The class reference if it exists, otherwise it creates it
+	 */
+	public function reference($class)
+	{
+		if (!$this->container->hasDefinition($class)) {
+			$this->register($class);
+		}
+
+		return new Reference($class);
+	}
 
 	/**
 	 * Register an proxy with the system
@@ -139,6 +169,7 @@ class Builder
 	 *
 	 * @param string $target The identifier of the target to alias
 	 * @param string $id     The class to be the concrete instance
+	 *
 	 * @return Alias
 	 */
 	public function alias(string $target, string $id): Alias
@@ -154,6 +185,7 @@ class Builder
 	 * @param string $id     The factory identifier
 	 * @param string $class  The class name
 	 * @param string $method The method to call on the class
+	 *
 	 * @return Definition
 	 */
 	public function factory(string $id, string $class, string $method): Definition
@@ -177,6 +209,7 @@ class Builder
 	 * The classes must be contained in the *.php
 	 *
 	 * @param string|array $path The path(s) to search for *.php on
+	 *
 	 * @return array
 	 */
 	public function findClassesInPath($path): array
@@ -185,10 +218,21 @@ class Builder
 		$classes = [];
 
 		foreach ($files as $file) {
-			$file = new ReflectionFile($file->getRealpath());
-			foreach ($file->getClasses() as $class) {
-				/** @var \ReflectionClass $class */
-				$classes[] = $class->getName();
+			try {
+				$file = new ReflectionFile($file->getRealpath());
+				foreach ($file->getClasses() as $class) {
+					/** @var \ReflectionClass $class */
+
+					if ($class->isAbstract() || $class->isInterface() || $class->isTrait()) {
+						// Don't load these as they can't be instantiated
+						continue;
+					}
+
+					$classes[] = $class->getName();
+				}
+			}
+			catch (\ReflectionException $e) {
+				continue;
 			}
 		}
 
@@ -201,6 +245,7 @@ class Builder
 	 * NOTE: If you need the concrete service call {$builder->container()->get($id)} instead
 	 *
 	 * @param string $id
+	 *
 	 * @return Definition
 	 */
 	public function get(string $id)
@@ -213,6 +258,7 @@ class Builder
 	 *
 	 * @param string $id    The identifier
 	 * @param string $class The class name
+	 *
 	 * @return Definition
 	 */
 	public function instance(string $id, string $class = null): Definition
@@ -227,6 +273,7 @@ class Builder
 	 * Returns whether or not the parameter exists
 	 *
 	 * @param string $id
+	 *
 	 * @return bool True if the parameter exists, False otherwise
 	 */
 	public function hasParameter(string $id): bool
@@ -239,6 +286,7 @@ class Builder
 	 *
 	 * @param string     $id      The parameter to look up
 	 * @param null|mixed $default The default value to return
+	 *
 	 * @return mixed The parameters value or the $default if it doesn't exist
 	 */
 	public function getParameter(string $id, $default = null)
@@ -251,6 +299,7 @@ class Builder
 	 *
 	 * @param string $id    The parameter id
 	 * @param mixed  $value The parameter value
+	 *
 	 * @return $this
 	 */
 	public function setParameter($id, $value)
@@ -265,6 +314,7 @@ class Builder
 	 *
 	 * @param string $id    The parameter id
 	 * @param mixed  $value The parameter value
+	 *
 	 * @return self
 	 */
 	public function setParameterDefault($id, $value): self
@@ -278,6 +328,7 @@ class Builder
 	 * Merges the parameters in to the existing params
 	 *
 	 * @param $params
+	 *
 	 * @return $this
 	 */
 	public function setParameters($params)
@@ -294,6 +345,7 @@ class Builder
 	 *
 	 * @param string $id    The identifier
 	 * @param string $class The class name
+	 *
 	 * @return Definition
 	 */
 	public function register(string $id, string $class = null): Definition
@@ -310,19 +362,31 @@ class Builder
 	 *
 	 * @param string $parent
 	 * @param string $child
+	 *
 	 * @return Definition
 	 * @throws \Exception
 	 */
 	public function decorate(string $parent, string $child): Definition
 	{
-		$parentObject = $this->container->hasDefinition($parent)
+		$parentDefinition = $this->container->hasDefinition($parent)
 			? $this->container->getDefinition($parent)
 			: $this->register($parent);
 
-		$this->container->setDefinition($parentKey = "{$child}.parent", $parentObject);
+		$this->container->setDefinition($parentKey = "{$child}.parent", $parentDefinition);
 
-		return $this->register($parent, $child)
-					->setArgument(0, new Reference($parentKey));
+		if ($this->container->hasDefinition($child)) {
+			$definition = $this->container->getDefinition($child);
+			$this->container->setDefinition($parent, $definition);
+		}
+		else {
+			$definition = $this->register($parent, $child);
+		}
+
+		if ($parentDefinition->isPublic()) {
+			$definition->setPublic(true);
+		}
+
+		return $definition->setArgument(0, new Reference($parentKey));
 	}
 
 	/**
@@ -330,6 +394,7 @@ class Builder
 	 *
 	 * @param string $id    The factory identifier
 	 * @param string $class The class name
+	 *
 	 * @return Definition
 	 */
 	public function singleton(string $id, string $class = null): Definition
@@ -338,9 +403,25 @@ class Builder
 	}
 
 	/**
+	 * Sets a modifier
+	 *
+	 * @param string   $id       The id to modify
+	 * @param callable $modifier The modification
+	 *
+	 * @return Builder
+	 */
+	public function modifier(string $id, callable $modifier): self
+	{
+		$this->modifiers[$id][] = $modifier;
+
+		return $this;
+	}
+
+	/**
 	 * Resolves the container builder
 	 *
 	 * @param ParameterBagInterface $parameterBag
+	 *
 	 * @return ContainerBuilder
 	 */
 	protected function resolveContainerBuilder(?ParameterBagInterface $parameterBag): ContainerBuilder
@@ -352,6 +433,7 @@ class Builder
 	 * Resolves the parameters used for dumping the container
 	 *
 	 * @param string $class
+	 *
 	 * @return array
 	 */
 	protected function resolveDumperParameters(string $class): array
