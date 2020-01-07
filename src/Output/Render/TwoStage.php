@@ -60,18 +60,36 @@ class TwoStage
 	{
 		$this->depth++;
 
-		$view   = $template{0} === '/' ? $template : "views/{$template}";
-		$output = parent::render($view, $data);
+		$output = parent::render($this->asViewPath($template), $data);
 
 		if (isset($this->layout) && --$this->depth === 0 && $this->layoutDone === false) {
-			$layout = $this->layout{0} === '/' ? $this->layout : "layouts/{$this->layout}";
-
 			$this->layoutDone = true;
 
-			return parent::render($layout, array_merge($data, ['content' => $output]));
+			return parent::render(
+				$this->asLayoutPath($this->layout),
+				array_merge($data, ['content' => $output])
+			);
 		}
 
 		return $output;
+	}
+
+	/**
+	 * @param string $layout The layout to locate under layouts
+	 * @return string The path to the layout
+	 */
+	protected function asLayoutPath($layout)
+	{
+		return $layout[0] === '/' ? $layout : "layouts/{$layout}";
+	}
+
+	/**
+	 * @param string $template The template to locate under views
+	 * @return string The path to the template under views
+	 */
+	protected function asViewPath($template)
+	{
+		return $template[0] === '/' ? $template : "views/{$template}";
 	}
 
 	/**
