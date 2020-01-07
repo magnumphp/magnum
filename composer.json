@@ -30,7 +30,6 @@
   },
   "require": {
     "dlundgren/phrender": "~0.1",
-    "dlundgren/pipeware": "^3.0",
     "dlundgren/slim-turbo": "^0.1.0",
     "jeremeamia/xstatic": "~1.0",
     "josegonzalez/dotenv": "^3.2",
