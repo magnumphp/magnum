@@ -1,8 +1,12 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Application
+ */
+
 namespace Magnum\Http;
 
-use Pipeware\Stack;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Slim\App;
@@ -24,10 +28,16 @@ class Application
 	 */
 	protected $request;
 
-	public function __construct(App $slim, ?ServerRequestInterface $request = null)
+	/**
+	 * @var array List of middleware for the Application
+	 */
+	protected $middleware = [];
+
+	public function __construct(App $slim, $middleware = [], ?ServerRequestInterface $request = null)
 	{
-		$this->slim    = $slim;
-		$this->request = $request;
+		$this->slim       = $slim;
+		$this->middleware = array_filter($middleware);
+		$this->request    = $request;
 	}
 
 	/**
@@ -39,12 +49,17 @@ class Application
 	 * sent to the client.
 	 *
 	 * @param ServerRequestInterface|null $request
+	 *
 	 * @return ResponseInterface The generated response
 	 */
 	public function run(?ServerRequestInterface $request = null): ResponseInterface
 	{
 		if (!$request && !$this->request) {
-			throw new \InvalidArgumentException("A " . ServerRequestInterface::class . ' object is required.');
+			throw new Exception\MissingServerRequest();
+		}
+
+		foreach ($this->middleware as $middleware) {
+			$this->slim->add($middleware);
 		}
 
 		return $this->slim->handle($request ?? $this->request);
