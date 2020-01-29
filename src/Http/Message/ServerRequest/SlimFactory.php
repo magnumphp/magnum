@@ -2,19 +2,43 @@
 
 namespace Magnum\Http\Message\ServerRequest;
 
+use Middlewares\Utils\Factory as MiddlewareFactory;
 use Psr\Http\Message\ServerRequestInterface;
-use Slim\Psr7\Factory\StreamFactory;
+use Psr\Http\Message\StreamInterface;
+use Slim\Psr7\Cookies;
 use Slim\Psr7\UploadedFile;
 
 class SlimFactory
+	extends AbstractFactory
 {
-	public static function updateRequest(ServerRequestInterface $request, array $globals): ServerRequestInterface
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function buildBodyStream(): StreamInterface
 	{
-		if (!empty($globals['_FILES'])) {
-			$request = $request->withUploadedFiles(UploadedFile::createFromGlobals($globals['_FILES'] ?? []));
-		}
+		$factory = MiddlewareFactory::getStreamFactory();
 
-		return $request
-			->withBody($globals['_INPUT'] ?? (new StreamFactory())->createStreamFromFile('php://input', 'r+'));
+		// slim extends this to handle the caching internally
+		return $factory->createStreamFromFile(
+			'php://input',
+			'r',
+			$factory->createStreamFromFile('php://temp', 'wb+')
+		);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function resolveCookies(ServerRequestInterface $request)
+	{
+		return Cookies::parseHeader($request->getHeaderLine('cookie'));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function resolveFiles(ServerRequestInterface $request)
+	{
+		return UploadedFile::createFromGlobals($_FILES);
 	}
 }

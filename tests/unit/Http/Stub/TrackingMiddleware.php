@@ -26,5 +26,4 @@ class TrackingMiddleware
 
 		return $this->response;
 	}
-
 }

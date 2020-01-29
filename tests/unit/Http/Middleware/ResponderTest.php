@@ -15,12 +15,12 @@ use Psr\Http\Server\RequestHandlerInterface;
 class ResponderTest
 	extends TestCase
 {
-	public function setUp()
+	public function setUp(): void
 	{
 		HeaderStack::reset();
 	}
 
-	public function tearDown()
+	public function tearDown(): void
 	{
 		HeaderStack::reset();
 	}

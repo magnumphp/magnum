@@ -7,7 +7,7 @@ use Slim\Turbo\Provider\RouteProvider;
 class Routes
 	implements RouteProvider
 {
-	public function register( $router)
+	public function register($router)
 	{
 		$router->get('/', TestAction::class)->setName('home');
 	}

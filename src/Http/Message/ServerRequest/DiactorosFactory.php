@@ -2,19 +2,36 @@
 
 namespace Magnum\Http\Message\ServerRequest;
 
+use function Laminas\Diactoros\parseCookieHeader;
+use function Laminas\Diactoros\normalizeUploadedFiles;
+use Laminas\Diactoros\PhpInputStream;
 use Psr\Http\Message\ServerRequestInterface;
-use function Zend\Diactoros\normalizeUploadedFiles;
-use Zend\Diactoros\PhpInputStream;
+use Psr\Http\Message\StreamInterface;
 
 class DiactorosFactory
+	extends AbstractFactory
 {
-	public static function updateRequest(ServerRequestInterface $request, array $globals): ServerRequestInterface
+	/**
+	 * {@inheritDoc}
+	 */
+	public function buildBodyStream(): StreamInterface
 	{
-		if (!empty($globals['_FILES'])) {
-			$request = $request->withUploadedFiles(normalizeUploadedFiles($globals['_FILES'] ?? []));
-		}
+		return new PhpInputStream();
+	}
 
-		return $request
-			->withBody($globals['_INPUT'] ?? new PhpInputStream());
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function resolveCookies(ServerRequestInterface $request)
+	{
+		return parseCookieHeader($request->getHeaderLine('Cookie'));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected function resolveFiles(ServerRequestInterface $request)
+	{
+		return normalizeUploadedFiles($_FILES);
 	}
 }
