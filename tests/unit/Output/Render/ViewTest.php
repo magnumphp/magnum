@@ -9,7 +9,7 @@ class ViewTest
 	extends TestCase
 {
 	protected $escaper;
-	public function setUp()
+	public function setUp(): void
 	{
 		$this->escaper = new class()
 		{

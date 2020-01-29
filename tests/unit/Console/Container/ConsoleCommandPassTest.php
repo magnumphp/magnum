@@ -11,7 +11,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 class ConsoleCommandPassTest
 	extends TestCase
 {
-	public function setUp()
+	public function setUp(): void
 	{
 		$this->container = new ContainerBuilder();
 		$this->container->addCompilerPass(new ConsoleCommandPass());

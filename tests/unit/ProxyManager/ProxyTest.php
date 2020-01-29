@@ -8,7 +8,7 @@ use Symfony\Component\DependencyInjection\Container;
 class ProxyTest
 	extends TestCase
 {
-	public function setUp()
+	public function setUp(): void
 	{
 		$this->manager = new Manager(
 			$this->container = new Container()

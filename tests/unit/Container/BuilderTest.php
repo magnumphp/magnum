@@ -100,7 +100,7 @@ class BuilderTest
 
 		$builder->saveToFile("vfs://test/test.php", 'CompiledContainer');
 		$content = file_get_contents("vfs://test/test.php");
-		self::assertContains("class CompiledContainer", $content);
+		self::assertStringContainsString("class CompiledContainer", $content);
 	}
 
 	public function testAutowiringWorks()

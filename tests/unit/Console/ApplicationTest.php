@@ -9,7 +9,7 @@ use Magnum\Console\Fixture\TestHandler;
 use PHPUnit\Framework\TestCase;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Input\ArgvInput;
-use Symfony\Component\Console\Tests\Fixtures\DummyOutput;
+use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Reference;
@@ -37,7 +37,7 @@ class ApplicationTest
 		$app->setAutoExit(false);
 		$app->run(
 			new ArgvInput(['test', 'test']),
-			new DummyOutput()
+			new NullOutput()
 		);
 
 		self::assertTrue($ran);
@@ -54,7 +54,7 @@ class ApplicationTest
 		$app->setAutoExit(false);
 		$app->run(
 			new ArgvInput(['test', 'test']),
-			new DummyOutput()
+			new NullOutput()
 		);
 
 		self::assertTrue($handler->ran);
@@ -73,14 +73,13 @@ class ApplicationTest
 				  ->setArgument('$container', new Reference(ContainerInterface::class))
 				  ->setArgument('$commandLoader', new Reference(Commands::class));
 
-		$o = new DummyOutput();
 		$container->compile();
 
 		$app = $container->get(Application::class);
 		$app->setAutoExit(false);
 		$app->run(
 			new ArgvInput(['test', 'test-command']),
-			$o
+			new NullOutput()
 		);
 
 		self::assertTrue(TestCommand::$seen);

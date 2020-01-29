@@ -17,7 +17,7 @@ class CommandsTest
 	 */
 	protected $cmds;
 
-	public function setUp()
+	public function setUp(): void
 	{
 		$this->vfs  = vfsStream::setup('root');
 		$this->cmds = new Commands(
@@ -50,7 +50,7 @@ class CommandsTest
 
 	public function testGetNamesReturnsArray()
 	{
-		self::assertInternalType('array', $this->cmds->getNames());
+		self::assertIsArray($this->cmds->getNames());
 		$this->cmds->register($this->app);
 		self::assertContains('test-command', $this->cmds->getNames());
 	}
