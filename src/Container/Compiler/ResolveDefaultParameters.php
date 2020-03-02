@@ -20,6 +20,9 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 class ResolveDefaultParameters
 	implements CompilerPassInterface
 {
+	/**
+	 * @var array List of parameters
+	 */
 	protected $params = [];
 
 	/**
@@ -46,6 +49,8 @@ class ResolveDefaultParameters
 	}
 
 	/**
+	 * Returns whether or not the service exists
+	 *
 	 * @param string $id The name of the service
 	 * @return bool True if the service exists, False otherwise
 	 */

@@ -9,9 +9,19 @@ namespace Magnum\Container\Exception;
 
 use Magnum\Container\Provider;
 
+/**
+ * Exception for when a class does not extend the Provider
+ *
+ * @package Magnum\Container\Exception
+ */
 class InvalidProvider
 	extends \InvalidArgumentException
 {
+	/**
+	 * InvalidProvider constructor.
+	 *
+	 * @param string|object $received The string or class that was received.
+	 */
 	public function __construct($received)
 	{
 		parent::__construct(

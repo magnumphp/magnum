@@ -48,10 +48,16 @@ class Loader
 	protected $params = [];
 
 	/**
-	 * @var Builder
+	 * @var Builder The container builder
 	 */
 	protected $builder;
 
+	/**
+	 * Loader constructor.
+	 *
+	 * @param bool $useCompilation Whether or not to use compilation
+	 * @param null $cacheFile      The name of the file to store the container cache in
+	 */
 	public function __construct($useCompilation = false, $cacheFile = null)
 	{
 		$this->useCompilation = $useCompilation;
@@ -142,6 +148,8 @@ class Loader
 	}
 
 	/**
+	 * Loads the container, either compiling it or from the compiled class
+	 *
 	 * @return ContainerInterface
 	 */
 	public function load(): ContainerInterface

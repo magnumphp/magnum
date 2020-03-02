@@ -28,7 +28,7 @@ class FullAutowirePass
 	protected $classArgumentParameterCache = [];
 
 	/**
-	 * @var ResolveDefaultParameters
+	 * @var ResolveDefaultParameters List of default parameters
 	 */
 	protected $defaultParameters;
 
@@ -37,11 +37,19 @@ class FullAutowirePass
 	 */
 	protected $nullables = [];
 
+	/**
+	 * FullAutowirePass constructor.
+	 *
+	 * @param ResolveDefaultParameters $defaultParameters List of default parameters
+	 */
 	public function __construct(ResolveDefaultParameters $defaultParameters)
 	{
 		$this->defaultParameters = $defaultParameters;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public function process(ContainerBuilder $container)
 	{
 		parent::process($container);
@@ -56,10 +64,7 @@ class FullAutowirePass
 	}
 
 	/**
-	 * @param mixed $value
-	 * @param bool  $isRoot
-	 * @return mixed
-	 * @throws \ReflectionException
+	 * {@inheritDoc}
 	 */
 	protected function processValue($value, $isRoot = false)
 	{
@@ -84,6 +89,7 @@ class FullAutowirePass
 	 * Runs the auto-wire resolution on the factory method
 	 *
 	 * @param Definition $definition
+	 *
 	 * @throws \ReflectionException
 	 */
 	protected function resolveFactoryReferences(Definition $definition)
@@ -112,6 +118,7 @@ class FullAutowirePass
 	 * Runs the auto-wire resolution if the constructor needs it
 	 *
 	 * @param Definition $value
+	 *
 	 * @throws \ReflectionException
 	 */
 	protected function resolveAutowiredReference(Definition $value): void
@@ -144,8 +151,10 @@ class FullAutowirePass
 	/**
 	 * Loads any types defined in the constructor
 	 *
+	 * @param string|Definition                     $definition  The definition to check for arguments
 	 * @param \ReflectionMethod|\ReflectionFunction $constructor The Constructor reflector
 	 * @param array                                 $arguments   List of arguments
+	 *
 	 * @throws \ReflectionException
 	 */
 	protected function loadConstructorArguments($definition, $constructor, array $arguments = [])
@@ -199,6 +208,7 @@ class FullAutowirePass
 	 *
 	 * @param \ReflectionClass|bool $class
 	 * @param string                $key
+	 *
 	 * @return bool|Reference|null
 	 * @throws \ReflectionException
 	 */
@@ -229,6 +239,7 @@ class FullAutowirePass
 	 * This caches the information as it might be used multiple times during compilation
 	 *
 	 * @param string $class
+	 *
 	 * @return array
 	 * @throws \ReflectionException
 	 */
@@ -280,6 +291,7 @@ class FullAutowirePass
 	 * Loads the class as an autowire
 	 *
 	 * @param $class
+	 *
 	 * @return bool Whether the class was loaded
 	 * @throws \ReflectionException
 	 */
