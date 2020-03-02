@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Message\ServerRequest\GuzzleFactory
+ */
+
 namespace Magnum\Http\Message\ServerRequest;
 
 use GuzzleHttp\Psr7\CachingStream;
@@ -38,6 +43,6 @@ class GuzzleFactory
 	 */
 	protected function resolveFiles(ServerRequestInterface $request)
 	{
-		return GuzzleServerRequest::normalizeFiles($_FILES);
+		return GuzzleServerRequest::normalizeFiles($_FILES ?? []);
 	}
 }

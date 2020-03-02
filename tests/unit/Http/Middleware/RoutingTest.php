@@ -3,10 +3,13 @@
 namespace Magnum\Http\Middleware;
 
 use FastRoute\RouteParser;
-use Magnum\Http\Routing\Result;
-use Magnum\Http\Routing\Route;
+use Magnum\Container\Builder;
+use Magnum\Http\ServiceProvider;
+use Magnum\Http\Stub\Routes;
+use Magnum\Http\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\Turbo\Provider\RouteProvider;
 
 class RoutingTest
 	extends TestCase
@@ -19,30 +22,43 @@ class RoutingTest
 	public function build($method, $path, $routes, $notFoundHandler = null, $badMethodHandler = null)
 	{
 		return [
-			new Routing($this->buildRouter($routes), $notFoundHandler, $badMethodHandler),
+			new Routing($this->buildMiddleware($routes), $notFoundHandler, $badMethodHandler),
 			$this->buildRequest($method, $path)
 		];
 	}
 
-	public function testProcessGood()
+	protected function container($notFoundHandler = null, $badMethodHandler = null)
 	{
-		$mw      = new Routing($this->buildRouter(['get' => ['/', 'test', 'get']]));
-		$request = $this->buildRequest('GET', '/');
-		$handler = $this->createMock(RequestHandlerInterface::class);
+		$builder = new Builder();
+		(new ServiceProvider())->register($builder);
+		$routing = $builder->register(Routing::class);
 
-		$handler->method('handle')->willReturn($this->createMock(ResponseInterface::class));
+		$routing->setPublic(true);
+		$notFoundHandler && $routing->setArgument('$notFoundHandler', $notFoundHandler);
+		$badMethodHandler && $routing->setArgument('$badMethodHandler', $badMethodHandler);
+
+		$builder->register(RouteProvider::class, Routes::class);
+
+		return $builder->container();
+	}
+
+	public function testFoundRoute()
+	{
+		$mw      = $this->container()->get(Routing::class);
+		$handler = $this->createMock(RequestHandlerInterface::class);
+		$request = $this->buildRequest('GET', '/');
+
+		$handler->method('handle')
+				->willReturn($this->createMock(ResponseInterface::class));
 		$mw->process($request, $handler);
 
-		self::assertArrayHasKey('routing_result', $request->attrs);
-		self::assertInstanceOf(Result::class, $request->attrs['routing_result']);
-
-		self::assertArrayHasKey('route', $request->attrs);
-		self::assertInstanceOf(Route::class, $request->attrs['route']);
+		self::assertArrayHasKey(Routing::ATTRIBUTE, $request->attrs);
+		self::assertArrayHasKey(Routing::RESULT_ATTRIBUTE, $request->attrs);
 	}
 
 	public function testFailureReturns404ResponseWithoutHandler()
 	{
-		$mw      = new Routing($this->buildRouter(['get' => ['/', 'test', 'get']]));
+		$mw      = $this->container()->get(Routing::class);
 		$request = $this->buildRequest('GET', '/test');
 		$handler = $this->createMock(RequestHandlerInterface::class);
 
@@ -56,7 +72,7 @@ class RoutingTest
 
 	public function testFailureReturns405ResponseWithoutHandler()
 	{
-		$mw      = new Routing($this->buildRouter(['get' => ['/', 'test', 'get']]));
+		$mw      = $this->container()->get(Routing::class);
 		$request = $this->buildRequest('POST', '/');
 		$handler = $this->createMock(RequestHandlerInterface::class);
 
@@ -64,7 +80,7 @@ class RoutingTest
 
 		/** @var ResponseInterface $r */
 		$r      = $mw->process($request, $handler);
-		$result = $request->attrs['routing_result'];
+		$result = $request->attrs[Routing::RESULT_ATTRIBUTE];
 
 		self::assertInstanceOf(ResponseInterface::class, $r);
 		self::assertEquals(405, $r->getStatusCode());
@@ -72,13 +88,13 @@ class RoutingTest
 
 	public function testProcessHonorsNotFoundHandler()
 	{
-		$custom  = $this->createMock(RequestHandlerInterface::class);
+		$custom = $this->createMock(RequestHandlerInterface::class);
 		$custom->expects($this->once())->method('handle')->willReturn($this->createMock(ResponseInterface::class));
 
 		$handler = $this->createMock(RequestHandlerInterface::class);
 		$handler->expects($this->never())->method('handle');
 
-		$mw      = new Routing($this->buildRouter(['get' => ['/', 'test', 'get']]), $custom);
+		$mw      = $this->container($custom)->get(Routing::class);
 		$request = $this->buildRequest('GET', '/test/no');
 
 		$mw->process($request, $handler);
@@ -86,13 +102,13 @@ class RoutingTest
 
 	public function testProcessHonorsBadMethodHandler()
 	{
-		$custom  = $this->createMock(RequestHandlerInterface::class);
+		$custom = $this->createMock(RequestHandlerInterface::class);
 		$custom->expects($this->once())->method('handle')->willReturn($this->createMock(ResponseInterface::class));
 
 		$handler = $this->createMock(RequestHandlerInterface::class);
 		$handler->expects($this->never())->method('handle');
 
-		$mw      = new Routing($this->buildRouter(['get' => ['/', 'test', 'get']]), null, $custom);
+		$mw      = $this->container(null, $custom)->get(Routing::class);
 		$request = $this->buildRequest('POST', '/');
 
 		$mw->process($request, $handler);

@@ -9,7 +9,6 @@ namespace Magnum\Http\Message\ServerRequest;
 
 use GuzzleHttp\Psr7\HttpFactory as GuzzleRequestFactory;
 use Laminas\Diactoros\ServerRequestFactory as LaminasRequestFactory;
-use League\Uri\Http;
 use Magnum\Http\Message\ServerRequest;
 use Middlewares\Utils\Factory as MiddlewareFactory;
 use Psr\Http\Message\ServerRequestInterface;

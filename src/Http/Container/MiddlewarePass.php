@@ -7,7 +7,6 @@
 
 namespace Magnum\Http\Container;
 
-use Pipeware\Pipeline\Containerized;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
@@ -29,6 +28,6 @@ class MiddlewarePass
 		}
 		krsort($middleware);
 
-		$container->setParameter(self::TAG_NAME, array_merge(...$middleware));
+		$container->setParameter(self::TAG_NAME, empty($middleware) ? [] : array_merge(...$middleware));
 	}
 }

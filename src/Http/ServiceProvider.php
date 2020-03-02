@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\ServiceProvider
+ */
+
 namespace Magnum\Http;
 
 use Magnum\Container\Builder;
@@ -47,8 +52,8 @@ class ServiceProvider
 		$builder->register($this->applicationTargetClass, $this->applicationActualClass)
 				->setArguments(
 					[
-						'$app'        => $builder->reference(App::class),
-						'$middleware' => $builder->reference(MiddlewarePass::TAG_NAME),
+						'$slim'       => $builder->reference(App::class),
+						'$middleware' => '%' . MiddlewarePass::TAG_NAME . '%',
 						'$request'    => $builder->reference(ServerRequestInterface::class)
 					]
 				)

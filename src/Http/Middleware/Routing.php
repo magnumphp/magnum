@@ -7,19 +7,23 @@
 
 namespace Magnum\Http\Middleware;
 
-use Magnum\Http\Request\Handler\StaticResponse;
+use Magnum\Http\Message\StaticResponse;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
 use Slim\Interfaces\RouteParserInterface;
 use Slim\Interfaces\RouteResolverInterface;
+use Slim\Routing\RouteContext;
 use Slim\Routing\RoutingResults;
 
 /**
  * Routing middleware
  *
  * This uses the same attribute as Slim's RoutingMiddleware so that Slims RouteRunner functions properly.
+ *
+ * It functions differently from Slim in that it does not throw exceptions on invalid routing. Instead you would
+ * set $notFoundHandler, or $badMethodHandler. This allows
  *
  * @package Magnum\Http\Middleware
  */
@@ -28,8 +32,8 @@ class Routing
 {
 	use IsMiddleware;
 
-	const ATTRIBUTE        = 'route';
-	const RESULT_ATTRIBUTE = 'routingResults';
+	const ATTRIBUTE        = RouteContext::ROUTE;
+	const RESULT_ATTRIBUTE = RouteContext::ROUTING_RESULTS;
 
 	/**
 	 * @var RouteParserInterface

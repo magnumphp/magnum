@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Message\ServerRequest\DiactorosFactory
+ */
+
 namespace Magnum\Http\Message\ServerRequest;
 
 use function Laminas\Diactoros\parseCookieHeader;
@@ -32,6 +37,6 @@ class DiactorosFactory
 	 */
 	protected function resolveFiles(ServerRequestInterface $request)
 	{
-		return normalizeUploadedFiles($_FILES);
+		return normalizeUploadedFiles($_FILES ?? []);
 	}
 }

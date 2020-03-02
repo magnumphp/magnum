@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Message\ServerRequest\SlimFactory
+ */
+
 namespace Magnum\Http\Message\ServerRequest;
 
 use Middlewares\Utils\Factory as MiddlewareFactory;
@@ -39,6 +44,6 @@ class SlimFactory
 	 */
 	protected function resolveFiles(ServerRequestInterface $request)
 	{
-		return UploadedFile::createFromGlobals($_FILES);
+		return UploadedFile::createFromGlobals($_FILES ?? []);
 	}
 }

@@ -7,31 +7,39 @@
 
 namespace Magnum\Http\Middleware;
 
+use Middlewares\Utils\Factory;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamFactoryInterface;
+use Psr\Http\Message\StreamInterface;
 use Psr\Http\Server\MiddlewareInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\ResponseEmitter;
 
 /**
- * Middleware to handle sending the response
- */
-
-/**
- * Slim Framework (https://slimframework.com)
+ * Middleware to handle sending the response.
  *
- * @license https://github.com/slimphp/Slim/blob/4.x/LICENSE.md (MIT License)
+ * This wraps the Slim\ResponseEmitter in middleware instead of using it in {\Slim\App::run()}
  */
 class Responder
 	implements MiddlewareInterface
 {
 	use IsMiddleware;
 
-	const DEFAULT_CHUNK_SIZE = 4096;
+	/**
+	 * @var ResponseEmitter
+	 */
+	protected $responseEmitter;
 
 	/**
-	 * @var int The response chunk size
+	 * @var StreamFactoryInterface
 	 */
-	protected $responseChunkSize = self::DEFAULT_CHUNK_SIZE;
+	protected $streamFactory;
+
+	public function __construct(ResponseEmitter $responseEmitter = null)
+	{
+		$this->responseEmitter = $responseEmitter ?? new ResponseEmitter;
+	}
 
 	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler = null): ResponseInterface
 	{
@@ -40,119 +48,37 @@ class Responder
 			: $this->createResponse(500);
 
 		if (strtoupper($request->getMethod()) === 'HEAD') {
-			$response = $response->withBody($this->createResponse(200)->getBody());
+			$response = $response->withBody($this->createEmptyStream());
 		}
 
 		return $this->send($response);
 	}
 
-	/**
-	 * Send the response the client
-	 *
-	 * @param ResponseInterface $response
-	 * @return ResponseInterface
-	 */
-	protected function respond(ResponseInterface $response)
+	protected function send(ResponseInterface $response): ResponseInterface
 	{
-		// Send response
-		if (!headers_sent()) {
-			// Headers
-			foreach ($response->getHeaders() as $name => $values) {
-				$first = true;
-				foreach ($values as $value) {
-					header(sprintf('%s: %s', $name, $value), $first);
-					$first = false;
-				}
-			}
-
-			// Set the status _after_ the headers, because of PHP's "helpful" behavior with location headers.
-			// See https://github.com/slimphp/Slim/issues/1730
-
-			// Status
-			$statusCode = $response->getStatusCode();
-			header(
-				sprintf(
-					'HTTP/%s %s %s',
-					$response->getProtocolVersion(),
-					$statusCode,
-					$response->getReasonPhrase()
-				),
-				true,
-				$statusCode
-			);
-		}
-
-		// Body
-		if (!$this->isEmptyResponse($response)) {
-			$body = $response->getBody();
-			if ($body->isSeekable()) {
-				$body->rewind();
-			}
-
-			$contentLength = (int)$response->getHeaderLine('Content-Length');
-			if (!$contentLength) {
-				$contentLength = $body->getSize();
-			}
-
-			if ($contentLength) {
-				while ($contentLength > 0 && !$body->eof()) {
-					$data = $body->read(min($this->responseChunkSize, $contentLength));
-					echo $data;
-
-					$contentLength -= strlen($data);
-
-					if (connection_status() != CONNECTION_NORMAL) {
-						break;
-					}
-				}
-			}
-			else {
-				while (!$body->eof()) {
-					echo $body->read($this->responseChunkSize);
-					if (connection_status() != CONNECTION_NORMAL) {
-						break;
-					}
-				}
-			}
-		}
+		$this->responseEmitter->emit($response);
 
 		return $response;
 	}
-
 	/**
-	 * Send the response if it's not empty
+	 * Sets the response factory that will be used
 	 *
-	 * @param ResponseInterface|null $response
-	 * @return ResponseInterface
+	 * @param StreamFactoryInterface $streamFactory
 	 */
-	protected function send(ResponseInterface $response): ResponseInterface
+	public function setStreamFactory(StreamFactoryInterface $streamFactory)
 	{
-		if ($this->isEmptyResponse($response)) {
-			$response = $response->withoutHeader('Content-Type')
-								 ->withoutHeader('Content-Length');
-		}
-
-		return $this->respond($response);
+		$this->streamFactory = $streamFactory;
 	}
 
 	/**
-	 * Helper method, which returns true if the provided response must not output a body and false
-	 * if the response could have a body.
+	 * Returns the factory created Stream object
 	 *
-	 * @see https://tools.ietf.org/html/rfc7231
-	 *
-	 * @param ResponseInterface $response
-	 * @return bool
+	 * @return StreamInterface The Factory created Response object
 	 */
-	protected function isEmptyResponse(ResponseInterface $response)
+	protected function createEmptyStream(): StreamInterface
 	{
-		if (method_exists($response, 'isEmpty')) {
-			return $response->isEmpty();
-		}
-		else {
-			$size = $response->getBody()->getSize();
-		}
-
-		return $size === 0 || in_array($response->getStatusCode(), [204, 205, 304]);
+		return isset($this->streamFactory)
+			? $this->streamFactory->createStream()
+			: Factory::createStream();
 	}
 }

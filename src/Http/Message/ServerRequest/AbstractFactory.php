@@ -1,5 +1,10 @@
 <?php
 
+/**
+ * @file
+ * Contains Magnum\Http\Message\ServerRequest\AbstractFactory
+ */
+
 namespace Magnum\Http\Message\ServerRequest;
 
 use League\Uri\Http;

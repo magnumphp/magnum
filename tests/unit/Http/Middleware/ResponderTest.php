@@ -2,10 +2,13 @@
 
 namespace Magnum\Http\Middleware;
 
-use Magnum\HeaderStack;
+use GuzzleHttp\Psr7\BufferStream;
+use Magnum\Http\TestCase;
 use Middlewares\Utils\Factory;
 use Psr\Http\Message\ServerRequestInterface;
+use Psr\Http\Message\StreamFactoryInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\ResponseEmitter;
 
 /**
  * Slim Framework (https://slimframework.com)
@@ -15,25 +18,6 @@ use Psr\Http\Server\RequestHandlerInterface;
 class ResponderTest
 	extends TestCase
 {
-	public function setUp(): void
-	{
-		HeaderStack::reset();
-	}
-
-	public function tearDown(): void
-	{
-		HeaderStack::reset();
-	}
-
-	public function xtestReturnsErrorResponse()
-	{
-		$mw = new Responder();
-		self::assertStatusCode(
-			500,
-			$mw->process($this->createMock(ServerRequestInterface::class))
-		);
-	}
-
 	protected function process($response)
 	{
 		$request = $this->createMock(ServerRequestInterface::class);
@@ -45,7 +29,7 @@ class ResponderTest
 		return (new Responder())->process($request, $handler);
 	}
 
-	public function testRespond()
+	public function testProcessDefaults()
 	{
 		$response = Factory::createResponse();
 		$response->getBody()->write('Hello');
@@ -55,56 +39,64 @@ class ResponderTest
 		$this->expectOutputString('Hello');
 	}
 
-	public function testRespondNoContent()
+	public function testProcessUsesCustomEmitter()
 	{
+		$request  = $this->createMock(ServerRequestInterface::class);
+		$handler  = $this->createMock(RequestHandlerInterface::class);
 		$response = Factory::createResponse();
-		$this->process($response);
-		$this->assertEquals(false, HeaderStack::has('Content-Type'));
-		$this->assertEquals(false, HeaderStack::has('Content-Length'));
-		$this->expectOutputString('');
-	}
 
-	public function testResponseReplacesPreviouslySetHeaders()
-	{
-		$response = Factory::createResponse(200, 'OK')
-			->withHeader('X-Foo', 'baz1')
-			->withAddedHeader('X-Foo', 'baz2');
-		$this->process($response);
-		$expectedStack = [
-			['header' => 'X-Foo: baz1', 'replace' => true, 'status_code' => null],
-			['header' => 'X-Foo: baz2', 'replace' => false, 'status_code' => null],
-			['header' => 'HTTP/1.1 200 OK', 'replace' => true, 'status_code' => 200],
-		];
-		$this->assertSame($expectedStack, HeaderStack::stack());
-	}
-
-	public function testIsResponseEmptyWithNonEmptyBodyAndTriggeringStatusCode()
-	{
-		$response = Factory::createResponse(204);
 		$response->getBody()->write('Hello');
-		$this->process($response);
-		$this->expectOutputString('');
-	}
-
-
-	public function testHeadReturnsEmptyResponse()
-	{
-		$request = $this->createMock(ServerRequestInterface::class);
-		$handler = $this->createMock(RequestHandlerInterface::class);
-
-		$response = Factory::createResponse(200);
-
-		$request->method('getMethod')->willReturn('HEAD');
 		$handler->expects($this->once())
 				->method('handle')
 				->willReturn($response);
 
-		(new Responder())->process($request, $handler);
+		$emitter = $this->createMock(ResponseEmitter::class);
 
-		$expectedStack = [
-			['header' => 'HTTP/1.1 200 OK', 'replace' => true, 'status_code' => 200],
-		];
+		// this is the assert
+		$emitter->expects($this->once())->method('emit');
 
-		self::assertSame($expectedStack, HeaderStack::stack());
+		(new Responder($emitter))->process($request, $handler);
+	}
+
+	public function testProcessEnsuresEmptyBodyOnHead()
+	{
+		$request  = $this->createMock(ServerRequestInterface::class);
+		$handler  = $this->createMock(RequestHandlerInterface::class);
+		$response = Factory::createResponse();
+
+		$response->getBody()->write('Hello');
+		$handler->expects($this->once())
+				->method('handle')
+				->willReturn($response);
+		$request->method('getMethod')
+				->willReturn('HEAD');
+
+		(new Responder)->process($request, $handler);
+
+		$this->expectOutputString('');
+	}
+
+	public function testEmptyStreamHonorsCustomStreamFactory()
+	{
+		$request  = $this->createMock(ServerRequestInterface::class);
+		$handler  = $this->createMock(RequestHandlerInterface::class);
+		$response = Factory::createResponse();
+
+		$response->getBody()->write('Hello');
+		$handler->expects($this->once())
+				->method('handle')
+				->willReturn($response);
+		$request->method('getMethod')
+				->willReturn('HEAD');
+
+		$responder = new Responder();
+		$factory = $this->createMock(StreamFactoryInterface::class);
+		$factory->expects($this->once())->method('createStream')->willReturn($buffer = new BufferStream);
+		$responder->setStreamFactory($factory);
+
+		$response = $responder->process($request, $handler);
+
+		self::assertEquals($buffer, $response->getBody());
+		self::assertEquals('', $buffer->getContents());
 	}
 }

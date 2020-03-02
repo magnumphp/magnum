@@ -2,6 +2,7 @@
 
 namespace Magnum\Http\Middleware;
 
+use Magnum\Http\TestCase;
 use Psr\Http\Server\RequestHandlerInterface;
 
 class ExceptionHandlerTest
