@@ -18,7 +18,7 @@ use XStatic\AliasLoaderInterface;
 class Manager
 {
 	const ROOT_NAMESPACE_GLOBAL = false;
-	const ROOT_NAMESPACE_ANY = true;
+	const ROOT_NAMESPACE_ANY    = true;
 
 	/**
 	 * @var ContainerInterface Container to inject into the Static Proxy classes and that holds the actual instances
@@ -40,6 +40,30 @@ class Manager
 		$this->aliasLoader = $aliasLoader ?: new AliasLoader();
 
 		$this->addProxy('ProxyManager', Proxy::class, $this);
+	}
+
+	/**
+	 * Factory method for the DependencyInjection Container
+	 *
+	 * @param ContainerInterface        $container
+	 * @param AliasLoaderInterface|null $aliasLoader
+	 * @param array                     $proxies
+	 *
+	 * @return Manager
+	 */
+	public static function factory(
+		ContainerInterface $container,
+		AliasLoaderInterface $aliasLoader = null,
+		array $proxies = []
+	) {
+		$instance = new self($container, $aliasLoader);
+		$instance->enable(self::ROOT_NAMESPACE_ANY);
+
+		foreach ($proxies as $alias => $target) {
+			$instance->addProxy($alias, $target);
+		}
+
+		return $instance;
 	}
 
 	/**

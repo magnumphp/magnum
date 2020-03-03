@@ -7,6 +7,8 @@
 
 namespace Magnum\Container;
 
+use Magnum\Container\Compiler\StaticProxyPass;
+use Magnum\ProxyManager\Manager;
 use mindplay\filereflection\ReflectionFile;
 use Psr\Container\ContainerInterface;
 use Symfony\Component\DependencyInjection\Alias;
@@ -60,6 +62,12 @@ class Builder
 		// we want this to happen after the defaults are resolved
 		$this->addCompilerPass(
 			$this->defaultParametersResolver = new Compiler\ResolveDefaultParameters(),
+			PassConfig::TYPE_BEFORE_OPTIMIZATION,
+			0
+		);
+
+		$this->addCompilerPass(
+			new StaticProxyPass,
 			PassConfig::TYPE_BEFORE_OPTIMIZATION,
 			0
 		);
@@ -121,6 +129,9 @@ class Builder
 
 		if ($this->container->isCompiled() === false) {
 			$this->container->compile();
+
+			// Ensure the proxies are registered when not compiling
+			$this->container->get(Manager::class);
 		}
 
 		return $this->container;
@@ -439,7 +450,8 @@ class Builder
 	protected function resolveDumperParameters(string $class): array
 	{
 		return [
-			'class' => $class
+			'class'      => $class,
+			'base_class' => CompiledServiceContainer::class,
 		];
 	}
 
