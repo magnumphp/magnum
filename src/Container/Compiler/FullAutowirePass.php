@@ -73,12 +73,7 @@ class FullAutowirePass
 				$this->resolveAutowiredReference($value);
 			}
 			elseif ($value->getFactory()) {
-				try {
-					$this->resolveFactoryReferences($value);
-				}
-				catch (\Exception $e) {
-					throw $e;
-				}
+				$this->resolveFactoryReferences($value);
 			}
 		}
 
@@ -95,20 +90,19 @@ class FullAutowirePass
 	protected function resolveFactoryReferences(Definition $definition)
 	{
 		list($class, $method) = $definition->getFactory();
-		if ($reflectionClass = $this->container->getReflectionClass($class, false)) {
-			if ($reflectionMethod = $reflectionClass->getMethod($method)) {
-				$params = $reflectionMethod->getParameters();
-				$args   = $definition->getArguments();
-				foreach ($params as $param) {
-					$name = '$' . $param->getName();
-					if (array_key_exists($name, $args) || array_key_exists($param->getPosition(), $args)) {
-						continue;
-					}
+		$reflectionClass = $this->container->getReflectionClass($class, false);
+		if ($reflectionClass && ($reflectionMethod = $reflectionClass->getMethod($method))) {
+			$params = $reflectionMethod->getParameters();
+			$args   = $definition->getArguments();
+			foreach ($params as $param) {
+				$name = '$' . $param->getName();
+				if (array_key_exists($name, $args) || array_key_exists($param->getPosition(), $args)) {
+					continue;
+				}
 
-					if ($type = ProxyHelper::getTypeHint($reflectionMethod, $param, true)) {
-						$this->load($type);
-						$definition->setArgument($param->getPosition(), new Reference($type));
-					}
+				if ($type = ProxyHelper::getTypeHint($reflectionMethod, $param, true)) {
+					$this->load($type);
+					$definition->setArgument($param->getPosition(), new Reference($type));
 				}
 			}
 		}
@@ -124,7 +118,7 @@ class FullAutowirePass
 	protected function resolveAutowiredReference(Definition $value): void
 	{
 		$class = $value->getClass();
-		if ($reflectionClass = $this->container->getReflectionClass($class, false)) {
+		if ($this->container->getReflectionClass($class, false)) {
 			try {
 				$constructor = $this->getConstructor($value, false);
 			}
@@ -139,11 +133,7 @@ class FullAutowirePass
 		else {
 			$this->container->log(
 				$this,
-				sprintf(
-					'Skipping service "%s": Class or interface "%s" cannot be loaded.',
-					$this->currentId,
-					$class
-				)
+				sprintf('Skipping service "%s": Class or interface "%s" cannot be loaded.', $this->currentId, $class)
 			);
 		}
 	}
@@ -173,32 +163,41 @@ class FullAutowirePass
 			) {
 				continue;
 			}
+			$this->applyDefinitionArguments($definition, $constructor, $key, $param);
+		}
+	}
 
-			if ($type = ProxyHelper::getTypeHint($constructor, $param, true)) {
-				if ($this->load($type) === false) {
-					if ($param->allowsNull()) {
-						$definition->setArgument($key, null);
-					}
-					if ($type === 'App\Http\Action\PhpInput') {
-						var_dump($definition);
-						die;
-					}
-				}
-				else {
-					$definition->setArgument($key, new Reference($type));
+	/**
+	 * Applies the arguments from the constructor key/params to the definition
+	 *
+	 * @param Definition                            $definition
+	 * @param \ReflectionMethod|\ReflectionFunction $constructor The Constructor reflector
+	 * @param string                                $key
+	 * @param \ReflectionParameter                  $param
+	 *
+	 * @throws \ReflectionException
+	 */
+	protected function applyDefinitionArguments(Definition $definition, $constructor, $key, $param)
+	{
+		if ($type = ProxyHelper::getTypeHint($constructor, $param, true)) {
+			if ($this->load($type) === false) {
+				if ($param->allowsNull()) {
+					$definition->setArgument($key, null);
 				}
 			}
 			else {
-				$parentClass = $constructor->getDeclaringClass()->getParentClass();
-				if ($parentClass === false) {
-					$parentClass = $this->container->getReflectionClass($definition->getClass(), false)
-												   ->getParentClass();
-				}
+				$definition->setArgument($key, new Reference($type));
+			}
+		}
+		else {
+			$parentClass = $constructor->getDeclaringClass()->getParentClass();
+			if ($parentClass === false) {
+				$parentClass = $this->container->getReflectionClass($definition->getClass(), false)->getParentClass();
+			}
 
-				if ($value = $this->resolveInheritedValue($parentClass, $key) ?: $this->defaultParameters->get($key)) {
-					// there was no type hint: List as missing and any parent classes will be checked
-					$definition->setArgument($key, $value);
-				}
+			if ($value = $this->resolveInheritedValue($parentClass, $key) ?: $this->defaultParameters->get($key)) {
+				// there was no type hint: List as missing and any parent classes will be checked
+				$definition->setArgument($key, $value);
 			}
 		}
 	}
@@ -220,17 +219,16 @@ class FullAutowirePass
 
 		list($arguments, $params) = $this->resolveConstructorArgumentsAndParameters($class->getName());
 
+		$value = null;
 		if (isset($arguments[$key])) {
-			return $arguments[$key];
+			$value = $arguments[$key];
 		}
-
-		if (isset($params[$key])) {
+		elseif (isset($params[$key])) {
 			$this->load($params[$key]);
-
-			return new Reference($params[$key]);
+			$value = new Reference($params[$key]);
 		}
 
-		return null;
+		return $value;
 	}
 
 	/**
@@ -297,11 +295,7 @@ class FullAutowirePass
 	 */
 	protected function load($class): bool
 	{
-		if (empty($class)) {
-			return false;
-		}
-
-		if (
+		if (empty($class) ||
 			$this->container->hasDefinition($class) ||
 			$this->container->hasAlias($class) ||
 			$this->container->has($class)
@@ -310,12 +304,10 @@ class FullAutowirePass
 			return true;
 		}
 
-		if ($reflectionClass = $this->container->getReflectionClass($class, false)) {
-			if ($reflectionClass->isInterface() || $reflectionClass->isAbstract() || $reflectionClass->isTrait()) {
-				// do not try to autowire these
-				return false;
-			}
-
+		$reflectionClass = $this->container->getReflectionClass($class, false);
+		if ($reflectionClass &&
+			!($reflectionClass->isInterface() || $reflectionClass->isAbstract() || $reflectionClass->isTrait())
+		) {
 			// Leave these private to prevent abuse of the system.
 			$definition = $this->container->autowire($class, $class);
 			if ($constructor = $reflectionClass->getConstructor()) {

@@ -67,7 +67,7 @@ class ServerRequest
 			return $this->$method();
 		}
 
-		throw new \RuntimeException("Invalid Property: {$name}");
+		throw new \OutOfBoundsException("Invalid Property: {$name}");
 	}
 
 	/**
