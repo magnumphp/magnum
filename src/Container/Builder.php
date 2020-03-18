@@ -7,6 +7,7 @@
 
 namespace Magnum\Container;
 
+use Magnum\Container\Compiler\ModifierPass;
 use Magnum\Container\Compiler\StaticProxyPass;
 use Magnum\ProxyManager\Manager;
 use mindplay\filereflection\ReflectionFile;
@@ -58,6 +59,12 @@ class Builder
 	public function __construct($parameterBag = null)
 	{
 		$this->container = $this->resolveContainerBuilder($parameterBag);
+
+		$this->addCompilerPass(
+			$this->modifiers = new ModifierPass,
+			PassConfig::TYPE_BEFORE_REMOVING,
+			0
+		);
 
 		// we want this to happen after the defaults are resolved
 		$this->addCompilerPass(
@@ -114,18 +121,6 @@ class Builder
 	public function container(): ContainerInterface
 	{
 		$this->defaultParametersResolver->param('proxies', $this->proxies);
-		foreach ($this->modifiers as $class => $modifiers) {
-			if ($this->container->hasAlias($class)) {
-				$class = (string)$this->container->getAlias($class);
-			}
-
-			if ($this->container->hasDefinition($class)) {
-				$definition = $this->container->getDefinition(($class));
-				foreach ($modifiers as $modifier) {
-					$modifier($definition);
-				}
-			}
-		}
 
 		if ($this->container->isCompiled() === false) {
 			$this->container->compile();
@@ -416,16 +411,15 @@ class Builder
 	/**
 	 * Sets a modifier
 	 *
-	 * @param string   $id       The id to modify
-	 * @param callable $modifier The modification
+	 * @param string $id The id to modify
 	 *
-	 * @return Builder
+	 * @return Modifier
 	 */
-	public function modifier(string $id, callable $modifier): self
+	public function modifier(string $id, callable $callable): Modifier
 	{
-		$this->modifiers[$id][] = $modifier;
+		$callable($modifier = $this->modifiers->get($id));
 
-		return $this;
+		return $modifier;
 	}
 
 	/**
