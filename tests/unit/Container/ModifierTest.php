@@ -69,7 +69,7 @@ class ModifierTest
 	public function testMultiMethods($setter, $args, $getter, $value, $expected)
 	{
 		$this->modifier->$setter(...$args);
-		$this->modifier->__invoke($this->definition, null);
+		$this->modifier->apply($this->definition, null);
 
 		self::assertEquals($expected, $this->definition->$getter($value));
 	}
@@ -78,7 +78,7 @@ class ModifierTest
 	{
 		$this->modifier->setArgument('test', 'kakaw');
 		$this->modifier->replaceArgument('test', 'test');
-		$this->modifier->__invoke($this->definition, null);
+		$this->modifier->apply($this->definition, null);
 
 		self::assertEquals('test', $this->definition->getArgument('test'));
 	}
@@ -87,7 +87,7 @@ class ModifierTest
 	{
 		$this->modifier->setTags(['boom' => 'bang']);
 		$this->modifier->clearTag('boom');
-		$this->modifier->__invoke($this->definition, null);
+		$this->modifier->apply($this->definition, null);
 
 		self::assertEquals([], $this->definition->getTag('boom'));
 	}
@@ -96,7 +96,7 @@ class ModifierTest
 	{
 		$this->modifier->addMethodCall('test');
 		$this->modifier->removeMethodCall('test');
-		$this->modifier->__invoke($this->definition, null);
+		$this->modifier->apply($this->definition, null);
 
 		self::assertEquals([], $this->definition->getMethodCalls());
 	}
@@ -104,7 +104,7 @@ class ModifierTest
 	public function testBindingsAreRecorded()
 	{
 		$this->modifier->setBindings(['$k' => 'b1']);
-		$this->modifier->__invoke($this->definition, null);
+		$this->modifier->apply($this->definition, null);
 
 		$bindings = $this->definition->getBindings();
 		self::assertArrayHasKey('$k', $bindings);

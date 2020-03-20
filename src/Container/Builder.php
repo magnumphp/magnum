@@ -415,11 +415,9 @@ class Builder
 	 *
 	 * @return Modifier
 	 */
-	public function modifier(string $id, callable $callable): Modifier
+	public function modifier(string $id): Modifier
 	{
-		$callable($modifier = $this->modifiers->get($id));
-
-		return $modifier;
+		return $this->modifiers->get($id);
 	}
 
 	/**

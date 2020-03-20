@@ -231,9 +231,7 @@ class BuilderTest
 	public function testModifiers()
 	{
 		$builder = new Builder();
-		$builder->modifier(ConstructorA::class, function (Definition $definition) {
-			$definition->setPublic(true)->addMethodCall('modify', ['k']);
-		});
+		$builder->modifier(ConstructorA::class)->setPublic(true)->addMethodCall('modify', ['k']);
 
 		$builder->register(ConstructorA::class);
 
@@ -243,10 +241,7 @@ class BuilderTest
 	public function testModifiersFollowAliases()
 	{
 		$builder = new Builder();
-		$builder->modifier('kakaw', function (Definition $definition) {
-			// the fact we will get it later means this is called
-			$definition->setPublic(true)->addMethodCall('modify', ['k']);
-		});
+		$builder->modifier('kakaw')->setPublic(true)->addMethodCall('modify', ['k']);
 
 		$builder->register(ConstructorA::class);
 		$builder->alias(ConstructorA::class, 'kakaw');
