@@ -62,7 +62,7 @@ class Builder
 
 		$this->addCompilerPass(
 			$this->modifiers = new ModifierPass,
-			PassConfig::TYPE_BEFORE_REMOVING,
+			PassConfig::TYPE_BEFORE_OPTIMIZATION,
 			0
 		);
 
