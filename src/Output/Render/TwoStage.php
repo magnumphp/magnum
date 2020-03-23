@@ -9,8 +9,16 @@ namespace Magnum\Output\Render;
 
 use Phrender\Engine;
 
+/**
+ * Extends the Phrender\Engine to handle two-stage rendering
+ *
+ * This renders the given view into a layout, if the current view render depth is 0.
+ *
+ * @package Magnum\Output\Render
+ */
 class TwoStage
 	extends Engine
+	implements LayoutAware
 {
 	/**
 	 * @var int the level of rendering we are currently at
