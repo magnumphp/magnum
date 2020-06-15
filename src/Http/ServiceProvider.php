@@ -9,6 +9,7 @@ namespace Magnum\Http;
 
 use Magnum\Container\Builder;
 use Magnum\Container\Provider;
+use Magnum\Http\Container\ActionRequestDecoratorPass;
 use Magnum\Http\Container\MiddlewarePass;
 use Magnum\Http\Message\ServerRequest\Factory;
 use Psr\Http\Message\ServerRequestInterface;
@@ -46,6 +47,7 @@ class ServiceProvider
 
 		$builder->setParameter(MiddlewarePass::TAG_NAME, ['']);
 		$builder->addCompilerPass(new MiddlewarePass(), PassConfig::TYPE_OPTIMIZE);
+		$builder->addCompilerPass(new ActionRequestDecoratorPass(), PassConfig::TYPE_OPTIMIZE);
 
 		$builder->factory(ServerRequestInterface::class, Factory::class, 'createFromGlobals');
 
