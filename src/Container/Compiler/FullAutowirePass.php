@@ -155,7 +155,6 @@ class FullAutowirePass
 		}
 
 		foreach ($parameters as $idx => $param) {
-			unset($value);
 			$key = '$' . $param->getName();
 			if ((array_key_exists($idx, $arguments) && '' !== $arguments[$idx]) ||
 				isset($arguments[$key]) ||
