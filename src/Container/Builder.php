@@ -142,7 +142,17 @@ class Builder
 	{
 		$this->container();
 
-		file_put_contents($file, (new PhpDumper($this->container))->dump($this->resolveDumperParameters($class)));
+		$container = (new PhpDumper($this->container))->dump($this->resolveDumperParameters($class));
+
+		// replace `public function __construct()` with `protected function init()`
+		// replace `parent::__construct();` with blankness
+		$container = str_replace(
+			['public function __construct()', 'parent::__construct();'],
+			['protected function init()', ''],
+			$container
+		);
+
+		file_put_contents($file, $container);
 	}
 
 	/**

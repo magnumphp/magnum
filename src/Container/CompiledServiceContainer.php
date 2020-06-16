@@ -28,6 +28,8 @@ class CompiledServiceContainer
 	{
 		parent::__construct($parameterBag);
 
+		$this->init();
+
 		$this->get(ProxyManager::class);
 	}
 }
