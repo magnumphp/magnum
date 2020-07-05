@@ -1,7 +1,9 @@
 <?php
 
-namespace Magnum\ProxyManager;
+namespace Magnum\ProxyManager\Tests;
 
+use Magnum\ProxyManager\Manager;
+use Magnum\ProxyManager\Proxy;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 

@@ -1,0 +1,34 @@
+{
+  "name": "magnum/proxy-manager",
+  "type": "library",
+  "description": "Extending XStatic since 2018",
+  "keywords": [],
+  "homepage": "https://github.com/magnumphp/magnum",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "David Lundgren"
+    },
+    {
+      "name": "Magnum Contributors",
+      "homepage": "https://github.com/magnumphp/magnum/contributors"
+    }
+  ],
+  "config": {
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "Magnum\\ProxyManager\\": "src"
+    },
+    "exclude-from-classmap": [
+      "/Tests/"
+    ]
+  },
+  "require": {
+    "php": ">=7.2",
+    "jeremeamia/xstatic": "~1.0",
+    "psr/container": "^1.0"
+  }
+}

@@ -1,10 +1,13 @@
 <?php
 
-namespace Magnum\ProxyManager;
+namespace Magnum\ProxyManager\Tests;
 
 use Magnum\Fixture\AliasLoader;
 use Magnum\Fixture\ProxyClass;
 use Magnum\Fixture\TestProxy;
+use Magnum\ProxyManager\Manager;
+use Magnum\ProxyManager\Proxy;
+use Magnum\ProxyManager\StaticProxy;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 
