@@ -20,7 +20,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Magnum\\ProxyManager\\": "src"
+      "Magnum\\ProxyManager\\": "."
     },
     "exclude-from-classmap": [
       "/Tests/"
