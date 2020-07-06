@@ -1,7 +1,7 @@
 {
   "name": "magnum/proxy-manager",
   "type": "library",
-  "description": "Extending XStatic since 2018",
+  "description": "Extending lhsazevedo/restatic",
   "keywords": [],
   "homepage": "https://github.com/magnumphp/magnum",
   "license": "MIT",
@@ -28,7 +28,6 @@
   },
   "require": {
     "php": ">=7.2",
-    "jeremeamia/xstatic": "~1.0",
-    "psr/container": "^1.0"
+    "lhsazevedo/restatic": "~1.0"
   }
 }

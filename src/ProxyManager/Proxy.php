@@ -19,6 +19,11 @@ class Proxy
 	 */
 	protected static $instance;
 
+	/**
+	 * Sets the instance of the Manager
+	 *
+	 * @param Manager $instance
+	 */
 	public static function setInstance(Manager $instance)
 	{
 		self::$instance = $instance;
