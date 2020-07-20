@@ -15,13 +15,13 @@ use ReStatic\StaticProxy as ReStaticProxy;
 abstract class StaticProxy
 	extends ReStaticProxy
 {
-	protected static $instance;
-
 	/**
 	 * {@inheritDoc}
 	 */
 	public static function getInstance()
 	{
-		return static::$instance ?? (static::$instance = parent::getInstance());
+		static $instance;
+
+		return $instance ?? ($instance = parent::getInstance());
 	}
 }
