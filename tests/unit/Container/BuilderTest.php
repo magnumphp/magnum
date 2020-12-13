@@ -267,6 +267,7 @@ class BuilderTest
 		$builder->register(ConstructorA::class)->setPublic(true);
 
 		$builder->decorate(ConstructorA::class, DecorateA::class);
+		$builder->decorate(ConstructorA::class, DecorateA::class);
 
 		self::assertEmpty($builder->get(ConstructorA::class)->getMethodCalls());
 		self::assertInstanceOf(DecorateA::class, $builder->container()->get(ConstructorA::class));

@@ -384,19 +384,24 @@ class Builder
 	 */
 	public function decorate(string $parent, string $child): Definition
 	{
+		$parentKey = "{$child}.parent";
+		if ($this->container->hasDefinition($parentKey)) {
+			// this will be a circular reference, just return the definition
+			return $this->container->getDefinition($parent);
+		}
+
 		$parentDefinition = $this->container->hasDefinition($parent)
 			? $this->container->getDefinition($parent)
 			: $this->register($parent);
 
 		$this->container->setDefinition($parentKey = "{$child}.parent", $parentDefinition);
 
-		if ($this->container->hasDefinition($child)) {
-			$definition = $this->container->getDefinition($child);
-			$this->container->setDefinition($parent, $definition);
-		}
-		else {
-			$definition = $this->register($parent, $child);
-		}
+		$definition = $this->container->hasDefinition($child)
+			? $this->container->getDefinition($child)
+			: $this->register($child);
+
+		// make it an alias so that we can re-use the child if needed
+		$this->container->setDefinition($parent, $definition);
 
 		if ($parentDefinition->isPublic()) {
 			$definition->setPublic(true);
