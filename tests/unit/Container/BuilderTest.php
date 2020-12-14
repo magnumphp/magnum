@@ -2,22 +2,16 @@
 
 namespace Magnum\Container;
 
-use Magnum\Container\Stub\BadConstructorC;
 use Magnum\Container\Stub\ConstructorA;
 use Magnum\Container\Stub\ConstructorB;
-use Magnum\Container\Stub\ConstructorC;
 use Magnum\Container\Stub\DecorateA;
-use Magnum\Container\Stub\StubProvider;
-use Magnum\Container\Stub\StubProviderWithSubProvider;
-use Magnum\Fixture\TestProxy;
+use Magnum\ProxyManager\Tests\Fixture\TestProxy;
 use org\bovigo\vfs\vfsStream;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\DependencyInjection\Tests\Compiler\ExtensionCompilerPassTest;
-use Symfony\Component\Finder\Finder;
 
 class BuilderTest
 	extends TestCase
@@ -141,7 +135,7 @@ class BuilderTest
 		$builder = new Builder();
 		$builder->addCompilerPass($pass);
 
-		$container = $builder->container();
+		$builder->container();
 
 		self::assertTrue($pass->called);
 	}

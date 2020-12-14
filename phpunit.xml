@@ -10,7 +10,8 @@
          stopOnFailure="true">
 	<testsuites>
 		<testsuite name="Unit">
-			<directory suffix="Test.php">./tests/unit</directory>
+			<directory suffix="Test.php">./tests/unit/</directory>
+			<directory suffix="Test.php">./src/ProxyManager/Tests/</directory>
 		</testsuite>
 
 		<testsuite name="Feature">
@@ -20,6 +21,9 @@
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="true">
 			<directory suffix=".php">./src/</directory>
+			<exclude>
+				<directory>./src/ProxyManager/Tests/</directory>
+			</exclude>
 		</whitelist>
 	</filter>
 	<php>
