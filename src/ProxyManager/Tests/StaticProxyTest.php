@@ -3,10 +3,10 @@
 namespace Magnum\ProxyManager\Tests;
 
 use Magnum\Container\Builder;
-use Magnum\Fixture\BadProxy;
-use Magnum\Fixture\ProxyClass;
-use Magnum\Fixture\TestProxy;
 use Magnum\ProxyManager\StaticProxy;
+use Magnum\ProxyManager\Tests\Fixture\BadProxy;
+use Magnum\ProxyManager\Tests\Fixture\ProxyClass;
+use Magnum\ProxyManager\Tests\Fixture\TestProxy;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -26,11 +26,7 @@ class StaticProxyTest
 
 	public function testSetContainerThrowsException()
 	{
-		$this->expectException(\InvalidArgumentException::class);
-		$this->expectExceptionMessage(
-			"Argument must implement Psr\\Container\\ContainerInterface " .
-			"or Magnum\\Container\\Builder. Received stdClass"
-		);
+		$this->expectException(\TypeError::class);
 
 		StaticProxy::setContainer(new \stdClass());
 	}
@@ -57,8 +53,8 @@ class StaticProxyTest
 	{
 		$this->expectException(\BadMethodCallException::class);
 		$this->expectExceptionMessage(
-			"The Magnum\\ProxyManager\\StaticProxy::getInstanceIdentifier " .
-			"method must be implemented by Magnum\\Fixture\\BadProxy."
+			"TheReStatic\\StaticProxy::getInstanceIdentifier " .
+			"method must be implemented by a subclass."
 		);
 
 		BadProxy::getInstance();

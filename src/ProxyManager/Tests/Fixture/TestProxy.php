@@ -1,6 +1,6 @@
 <?php
 
-namespace Magnum\Fixture;
+namespace Magnum\ProxyManager\Tests\Fixture;
 
 use Magnum\ProxyManager\StaticProxy;
 
@@ -17,7 +17,7 @@ class TestProxy
 		self::$instance = $instance;
 	}
 
-	public static function getInstanceIdentifier()
+	public static function getInstanceIdentifier(): string
 	{
 		return ProxyClass::class;
 	}

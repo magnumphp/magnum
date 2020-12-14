@@ -2,13 +2,15 @@
 
 namespace Magnum\ProxyManager\Tests;
 
-use Magnum\Fixture\AliasLoader;
-use Magnum\Fixture\ProxyClass;
-use Magnum\Fixture\TestProxy;
+use Magnum\Fixture\Middleware\Test;
 use Magnum\ProxyManager\Manager;
 use Magnum\ProxyManager\Proxy;
 use Magnum\ProxyManager\StaticProxy;
+use Magnum\ProxyManager\Tests\Fixture\AliasLoader;
+use Magnum\ProxyManager\Tests\Fixture\ProxyClass;
+use Magnum\ProxyManager\Tests\Fixture\TestProxy;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Container;
 
 class ManagerTest
@@ -16,6 +18,13 @@ class ManagerTest
 {
 	public function setUp(): void
 	{
+		// remove ALL of the alias loaders
+		foreach (spl_autoload_functions() as $autoload) {
+			if ($autoload instanceof \ReStatic\AliasLoader || (is_array($autoload) && $autoload[0] instanceof \ReStatic\AliasLoader)) {
+				spl_autoload_unregister($autoload);
+			}
+		}
+
 		$this->manager = new Manager(
 			$this->container = new Container(),
 			$this->aliasLoader = new AliasLoader()
@@ -29,7 +38,7 @@ class ManagerTest
 		self::assertSame($this->manager, $properties['instance']);
 	}
 
-	public function testAddProxy()
+	public function testAddProxyHonorsCustomProxyClass()
 	{
 		$this->manager->addProxy(
 			'TestProxy',
@@ -56,7 +65,7 @@ class ManagerTest
 
 	public function testEnableRegistersTheAliasLoader()
 	{
-		$al = $this->createMock(\XStatic\AliasLoader::class);
+		$al = $this->createMock(\ReStatic\AliasLoader::class);
 		$al->method('isRegistered')
 			->will($this->returnValueMap(
 				[false],
@@ -67,7 +76,7 @@ class ManagerTest
 
 	public function testEnableDoesNotDoubleRegister()
 	{
-		$al = $this->createMock(\XStatic\AliasLoader::class);
+		$al = $this->createMock(\ReStatic\AliasLoader::class);
 		$al->method('isRegistered')
 			->willReturn(true);
 		$al->expects($this->never())

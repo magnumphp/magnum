@@ -1,6 +1,6 @@
 <?php
 
-namespace Magnum\Fixture;
+namespace Magnum\ProxyManager\Tests\Fixture;
 
 use Magnum\ProxyManager\StaticProxy;
 
