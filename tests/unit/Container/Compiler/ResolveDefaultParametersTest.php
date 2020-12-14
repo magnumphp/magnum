@@ -35,4 +35,16 @@ class ResolveDefaultParametersTest
 
 		self::assertEquals('test', $a->a);
 	}
+
+	public function testHasReturnsTrue()
+	{
+		$rdp = new ResolveDefaultParameters();
+		$rdp->param('test', true);
+		self::assertTrue($rdp->has('test'));
+	}
+
+	public function testHasReturnsFalse()
+	{
+		self::assertFalse((new ResolveDefaultParameters)->has('test'));
+	}
 }

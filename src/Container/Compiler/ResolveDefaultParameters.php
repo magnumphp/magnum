@@ -49,10 +49,10 @@ class ResolveDefaultParameters
 	}
 
 	/**
-	 * Returns whether or not the service exists
+	 * Returns whether or not the parameter exists
 	 *
-	 * @param string $id The name of the service
-	 * @return bool True if the service exists, False otherwise
+	 * @param string $id The name of the parameter
+	 * @return bool True if the parameter exists, False otherwise
 	 */
 	public function has($id): bool
 	{
