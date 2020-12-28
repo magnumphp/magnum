@@ -146,7 +146,7 @@ class Modifier
 			switch ($key) {
 				case 'deprecated':
 					// ignored as we record it differently to trap the template
-					continue;
+					break;
 				case 'decorated_service':
 					$definition->setDecoratedService(...$this->getDecoratedService());
 					break;
@@ -157,7 +157,6 @@ class Modifier
 				case 'shared':
 					$definition->{'set' . ucfirst($key)}($this->{'is' . ucfirst($key)}());
 					break;
-
 				case 'class':
 					if ($this->getClass() === $alias) {
 						// we must ignore the alias in this case
