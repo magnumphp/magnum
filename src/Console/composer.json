@@ -1,0 +1,32 @@
+{
+  "name": "magnum/console",
+  "type": "library",
+  "description": "Extends Symfony Console",
+  "keywords": [
+    "console"
+  ],
+  "homepage": "https://github.com/magnumphp/magnum",
+  "license": "MIT",
+  "minimum-stability": "dev",
+  "authors": [
+    {
+      "name": "David Lundgren"
+    },
+    {
+      "name": "Magnum Contributors",
+      "homepage": "https://github.com/magnumphp/magnum/contributors"
+    }
+  ],
+  "config": {
+    "sort-packages": true
+  },
+  "autoload": {
+    "psr-4": {
+      "Magnum\\Console\\": "."
+    }
+  },
+  "require": {
+    "php": ">=7.2",
+    "symfony/console": "^4.1"
+  }
+}
