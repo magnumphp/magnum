@@ -28,6 +28,6 @@
   },
   "require": {
     "php": ">=7.2",
-    "lhsazevedo/restatic": "~1.0"
+    "lhsazevedo/restatic": "~3.0"
   }
 }
