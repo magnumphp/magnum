@@ -307,7 +307,9 @@ class Builder
 	 */
 	public function getParameter(string $id, $default = null)
 	{
-		return $this->container->hasParameter($id) ? $this->container->getParameter($id) : $default;
+		return $this->container->hasParameter($id)
+			? $this->container->getParameter($id)
+			: $this->defaultParametersResolver->get($id, $default);
 	}
 
 	/**
