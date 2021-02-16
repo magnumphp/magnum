@@ -3,10 +3,13 @@
 namespace Magnum\ProxyManager\Tests;
 
 use Magnum\Container\Builder;
+use Magnum\ProxyManager\Proxy;
 use Magnum\ProxyManager\StaticProxy;
 use Magnum\ProxyManager\Tests\Fixture\BadProxy;
 use Magnum\ProxyManager\Tests\Fixture\ProxyClass;
 use Magnum\ProxyManager\Tests\Fixture\TestProxy;
+use Magnum\ProxyManager\Tests\Fixture\TestTwoProxy;
+use Magnum\ProxyManager\Tests\Fixture\TestThreeProxy;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 
@@ -53,6 +56,7 @@ class StaticProxyTest
 	{
 		$this->expectException(\BadMethodCallException::class);
 		$this->expectExceptionMessage(
+			// This typo is in ReStatic
 			"TheReStatic\\StaticProxy::getInstanceIdentifier " .
 			"method must be implemented by a subclass."
 		);
@@ -67,5 +71,18 @@ class StaticProxyTest
 		TestProxy::test();
 
 		self::assertTrue($pc->test);
+	}
+
+	public function testInstancesAreSeparate()
+	{
+		$b = new Builder();
+		$b->register(ProxyClass::class)->setPublic(true);
+		$b->register(BadProxy::class)->setPublic(true);
+		StaticProxy::setContainer($b->container());
+
+		$t2 = TestTwoProxy::getInstance();
+		$t3 = TestThreeProxy::getInstance();
+
+		self::assertNotEquals($t2, $t3);
 	}
 }

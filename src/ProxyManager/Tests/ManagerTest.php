@@ -67,10 +67,11 @@ class ManagerTest
 	{
 		$al = $this->createMock(\ReStatic\AliasLoader::class);
 		$al->method('isRegistered')
-			->will($this->returnValueMap(
-				[false],
-				[true]
-			));
+		   ->will(
+			   $this->returnValueMap(
+				   [false],
+				   [true]
+			   ));
 		self::assertTrue($this->manager->enable());
 	}
 
@@ -78,7 +79,7 @@ class ManagerTest
 	{
 		$al = $this->createMock(\ReStatic\AliasLoader::class);
 		$al->method('isRegistered')
-			->willReturn(true);
+		   ->willReturn(true);
 		$al->expects($this->never())
 		   ->method('register');
 		$m = new Manager(

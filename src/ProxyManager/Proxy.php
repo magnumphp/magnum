@@ -26,7 +26,7 @@ class Proxy
 	 */
 	public static function setInstance(Manager $instance)
 	{
-		self::$instance = $instance;
+		static::$instance = $instance;
 	}
 
 	/**

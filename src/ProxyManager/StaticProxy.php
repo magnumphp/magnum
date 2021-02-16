@@ -17,8 +17,6 @@ use ReStatic\StaticProxy as ReStaticProxy;
 abstract class StaticProxy
 	extends ReStaticProxy
 {
-	protected static $instance;
-
 	/**
 	 * Sets the Container that will be used to retrieve the Proxy Subject
 	 *
@@ -36,6 +34,20 @@ abstract class StaticProxy
 	 */
 	public static function getInstance()
 	{
-		return static::$instance ?? (static::$instance = parent::getInstance());
+		return static::instance();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public static function instance($instance = null, $clear = false)
+	{
+		static $_instance;
+
+		if ($_instance && !$clear) {
+			return $_instance;
+		}
+
+		return $_instance = $clear ? null : ($instance ?? parent::getInstance());
 	}
 }

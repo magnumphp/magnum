@@ -14,7 +14,7 @@ class TestProxy
 
 	public static function setInstance(ProxyClass $instance)
 	{
-		self::$instance = $instance;
+		self::instance($instance);
 	}
 
 	public static function getInstanceIdentifier(): string
@@ -24,7 +24,7 @@ class TestProxy
 
 	public static function clear()
 	{
-		static::$instance = null;
+		static::instance(null, true);
 		static::$container = null;
 	}
 }
