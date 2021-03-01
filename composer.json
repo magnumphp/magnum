@@ -31,9 +31,9 @@
   "require": {
     "dlundgren/phrender": "~0.1",
     "dlundgren/slim-turbo": "^0.4",
-    "lhsazevedo/restatic": "~3",
     "josegonzalez/dotenv": "^3.2",
     "league/uri": "^6.0",
+    "lhsazevedo/restatic": "~3",
     "middlewares/utils": "^3.0",
     "mindplay/filereflection": "^1.2",
     "nikic/fast-route": "^1.0",

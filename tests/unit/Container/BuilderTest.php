@@ -221,4 +221,14 @@ class BuilderTest
 		self::assertNotEmpty($this->builder->get(ConstructorA::class)->getMethodCalls());
 		self::assertInstanceOf(DecorateA::class, $this->builder->container()->get(ConstructorA::class));
 	}
+
+	public function testAppendPath()
+	{
+		$this->builder->register(ConstructorA::class)->setPublic(true)->setArguments(['$a' => '%paths%']);
+		$this->builder->appendPath('test', '/kakaw', 'kakaw');
+		$a = $this->builder->container()->get(ConstructorA::class);
+
+		self::assertEquals(['/kakaw'], $a->a['test']);
+		self::assertEquals(['kakaw', 'kakaw-test'], $a->a['tags']);
+	}
 }

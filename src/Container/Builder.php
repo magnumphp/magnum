@@ -8,6 +8,7 @@
 namespace Magnum\Container;
 
 use Magnum\Container\Compiler\ModifierPass;
+use Magnum\Container\Compiler\ResolvePathsParameter;
 use Magnum\Container\Compiler\StaticProxyPass;
 use Magnum\ProxyManager\Manager;
 use mindplay\filereflection\ReflectionFile;
@@ -31,6 +32,16 @@ use Symfony\Component\Finder\Finder;
 class Builder
 {
 	/**
+	 * @var string[] List of CompilerPasses to register
+	 */
+	protected $defaultBeforeOptimizationCompilerPasses = [
+		ModifierPass::class                      => 'modifiers',
+		Compiler\ResolveDefaultParameters::class => 'defaultParametersResolver',
+		Compiler\ResolvePathsParameter::class     => 'paths',
+		StaticProxyPass::class
+	];
+
+	/**
 	 * @var ContainerBuilder
 	 */
 	protected $container;
@@ -39,6 +50,11 @@ class Builder
 	 * @var Finder
 	 */
 	protected $finder;
+
+	/**
+	 * @var ResolvePathsParameter List of paths parameters to register
+	 */
+	protected $paths;
 
 	/**
 	 * @var array List of proxy classes
@@ -60,24 +76,13 @@ class Builder
 	{
 		$this->container = $this->resolveContainerBuilder($parameterBag);
 
-		$this->addCompilerPass(
-			$this->modifiers = new ModifierPass,
-			PassConfig::TYPE_BEFORE_OPTIMIZATION,
-			0
-		);
-
-		// we want this to happen after the defaults are resolved
-		$this->addCompilerPass(
-			$this->defaultParametersResolver = new Compiler\ResolveDefaultParameters(),
-			PassConfig::TYPE_BEFORE_OPTIMIZATION,
-			0
-		);
-
-		$this->addCompilerPass(
-			new StaticProxyPass,
-			PassConfig::TYPE_BEFORE_OPTIMIZATION,
-			0
-		);
+		foreach ($this->defaultBeforeOptimizationCompilerPasses as $class => $param) {
+			$this->addCompilerPass(
+				is_integer($class) ? new $param : ($this->$param = new $class),
+				PassConfig::TYPE_BEFORE_OPTIMIZATION,
+				0
+			);
+		}
 
 		// Ensure full auto-wire is set up
 		$this->container->addCompilerPass(
@@ -435,6 +440,52 @@ class Builder
 	public function modifier(string $id): Modifier
 	{
 		return $this->modifiers->get($id);
+	}
+
+	/**
+	 * Appends a path(s) to the given path key
+	 *
+	 * @param string      $name  The path key name
+	 * @param             $paths The path(s) to append
+	 * @param string|null $tag   Whether or not to tag the path
+	 *
+	 * @return $this
+	 */
+	public function addPath(string $name, $paths, ?string $tag = null)
+	{
+		return $this->appendPath($name, $paths, $tag);
+	}
+
+	/**
+	 * Appends a path(s) to the given path key
+	 *
+	 * @param string      $name  The path key name
+	 * @param             $paths The path(s) to append
+	 * @param string|null $tag   Whether or not to tag the path
+	 *
+	 * @return $this
+	 */
+	public function appendPath(string $name, $paths, ?string $tag = null)
+	{
+		$this->paths->append($name, $paths, $tag);
+
+		return $this;
+	}
+
+	/**
+	 * Prepends a path(s) to the given path key
+	 *
+	 * @param string      $name  The path key name
+	 * @param             $paths The path(s) to append
+	 * @param string|null $tag   Whether or not to tag the path
+	 *
+	 * @return $this
+	 */
+	public function prependPath(string $name, $paths, ?string $tag = null)
+	{
+		$this->paths->prepend($name, $paths, $tag);
+
+		return $this;
 	}
 
 	/**
