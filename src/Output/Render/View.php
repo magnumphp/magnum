@@ -35,6 +35,30 @@ class View
 	}
 
 	/**
+	 * Escape the value
+	 *
+	 * @param string $value
+	 * @return mixed
+	 */
+	public function escape($value)
+	{
+		return isset($this->escaper)
+			? $this->escaper->escape($value)
+			: $value;
+	}
+
+	/**
+	 * Returns the raw value
+	 *
+	 * @param $name
+	 * @return mixed|null
+	 */
+	public function raw($name)
+	{
+		return parent::__get($name);
+	}
+
+	/**
 	 * @param InteropContext $context
 	 * @return string The rendered output
 	 */
@@ -54,29 +78,5 @@ class View
 		$content = ob_get_clean();
 
 		return $content === false ? '' : $content;
-	}
-
-	/**
-	 * Returns the raw value
-	 *
-	 * @param $name
-	 * @return mixed|null
-	 */
-	protected function raw($name)
-	{
-		return parent::__get($name);
-	}
-
-	/**
-	 * Escape the value
-	 *
-	 * @param string $value
-	 * @return mixed
-	 */
-	public function escape($value)
-	{
-		return isset($this->escaper)
-			? $this->escaper->escape($value)
-			: $value;
 	}
 }

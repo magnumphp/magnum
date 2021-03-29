@@ -54,7 +54,20 @@ class ViewTest
 		self::assertEquals('%test%', $view->render(new MutableContext(['var' => 'test'])));
 	}
 
-	public function testRawReturnsRealValue()
+	public function testRawReturnsValue()
+	{
+		$view = new class($sut = new \stdClass()) extends View {
+			public function __construct($sut) {
+				$this->data = [
+					'var' => $sut
+				];
+			}
+		};
+
+		self::assertEquals($sut, $view->raw('var'));
+	}
+
+	public function testRawRendersRealValue()
 	{
 		$view          = $this->buildView('test-raw');
 		$view->escaper = $this->escaper;
