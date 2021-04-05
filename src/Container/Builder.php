@@ -489,6 +489,37 @@ class Builder
 	}
 
 	/**
+	 * Resolves the path replacement
+	 *
+	 * @param string $path The path to resolve replacements for
+	 *
+	 * @return string|array The resolved path
+	 */
+	public function resolvePath(string $path)
+	{
+		return $this->paths->resolve($path);
+	}
+
+	/**
+	 * Resolves the paths replacements
+	 *
+	 * @param string[] $paths The path to resolve replacements for
+	 *
+	 * @return string[] The resolved path
+	 */
+	public function resolvePaths(array $paths = []): array
+	{
+		$returnPaths = [];
+		foreach ($paths as $path) {
+			foreach ((array)$this->paths->resolve($path) as $retPath) {
+				$returnPaths[] = $retPath;
+			}
+		}
+
+		return $returnPaths;
+	}
+
+	/**
 	 * Sets the path value
 	 *
 	 * @param string $name  The path key name

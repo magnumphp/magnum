@@ -39,7 +39,7 @@ class ResolvePathsParameter
 	 */
 	public function append(string $name, $paths, ?string $tag = null): self
 	{
-		list($paths, $tagNameKey) = $this->resolve($paths, $name, $tag);
+		list($paths, $tagNameKey) = $this->resolvePathsAndTagNameKey($paths, $name, $tag);
 
 		array_push($this->paths[$name], ...$paths);
 		if ($tag) {
@@ -61,7 +61,7 @@ class ResolvePathsParameter
 	 */
 	public function prepend($name, $paths, ?string $tag = null): self
 	{
-		list($paths, $tagNameKey) = $this->resolve($paths, $name, $tag);
+		list($paths, $tagNameKey) = $this->resolvePathsAndTagNameKey($paths, $name, $tag);
 
 		array_unshift($this->paths[$name], ...$paths);
 		if ($tag) {
@@ -97,6 +97,20 @@ class ResolvePathsParameter
 	}
 
 	/**
+	 * Resolves the path to it's expanded parts when applicable
+	 *
+	 * @param string $path
+	 *
+	 * @return mixed
+	 */
+	public function resolve(string $path)
+	{
+		$this->resolvePathPermutations($path, $paths);
+
+		return count($paths) === 1 ? array_pop($paths) : $paths;
+	}
+
+	/**
 	 * Prepends a path(s) to the path parameter, optionally tagging them
 	 *
 	 * @param string      $name  The name of the path parameter
@@ -107,11 +121,37 @@ class ResolvePathsParameter
 	 */
 	public function set(string $name, $value, ?string $tag = null): self
 	{
-		list($paths, $tagNameKey) = $this->resolve($value, $name, $tag);
+		list($paths, $tagNameKey) = $this->resolvePathsAndTagNameKey($value, $name, $tag);
 
 		$this->paths[$name] = $value;
 
 		return $this;
+	}
+
+	/**
+	 * Generates the list of path permutations
+	 *
+	 * @param string $path
+	 * @param array  $paths
+	 */
+	protected function resolvePathPermutations(string $path, &$paths = [])
+	{
+		if (preg_match_all('/%paths\.([^%\s]+)%/', $path, $matches, PREG_SET_ORDER)) {
+			foreach ($matches as $match) {
+				$tmp = $this->paths[$match[1]] ?? null;
+				if (is_array($tmp)) {
+					foreach ($tmp as $matchPath) {
+						$this->resolvePathPermutations(str_replace($match[0], $matchPath, $path), $paths);
+					}
+				}
+				else {
+					$paths[] = str_replace($match[0], $tmp, $path);
+				}
+			}
+		}
+		else {
+			$paths[] = $path;
+		}
 	}
 
 	/**
@@ -123,7 +163,7 @@ class ResolvePathsParameter
 	 *
 	 * @return array
 	 */
-	protected function resolve($paths, string $name, ?string $tag)
+	protected function resolvePathsAndTagNameKey($paths, string $name, ?string $tag)
 	{
 		if (in_array($name, ['keys', 'tags', 'tag'])) {
 			throw new \InvalidArgumentException("`{$name}` is a reserved path name");
