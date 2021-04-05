@@ -97,6 +97,24 @@ class ResolvePathsParameter
 	}
 
 	/**
+	 * Prepends a path(s) to the path parameter, optionally tagging them
+	 *
+	 * @param string      $name  The name of the path parameter
+	 * @param mixed       $value The value(s) to set
+	 * @param string|null $tag   Whether or not to tag the paths
+	 *
+	 * @return self
+	 */
+	public function set(string $name, $value, ?string $tag = null): self
+	{
+		list($paths, $tagNameKey) = $this->resolve($value, $name, $tag);
+
+		$this->paths[$name] = $value;
+
+		return $this;
+	}
+
+	/**
 	 * Resolves the paths & tagNameKey for use in append/prepend
 	 *
 	 * @param string|string[] $paths List of paths to remove from the arrays

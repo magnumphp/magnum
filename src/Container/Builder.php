@@ -489,6 +489,21 @@ class Builder
 	}
 
 	/**
+	 * Sets the path value
+	 *
+	 * @param string $name  The path key name
+	 * @param        $value The data to write
+	 *
+	 * @return $this
+	 */
+	public function setPath(string $name, $value)
+	{
+		$this->paths->set($name, $value);
+
+		return $this;
+	}
+
+	/**
 	 * Resolves the container builder
 	 *
 	 * @param ParameterBagInterface $parameterBag
