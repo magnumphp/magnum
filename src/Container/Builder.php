@@ -37,7 +37,7 @@ class Builder
 	protected $defaultBeforeOptimizationCompilerPasses = [
 		ModifierPass::class                      => 'modifiers',
 		Compiler\ResolveDefaultParameters::class => 'defaultParametersResolver',
-		Compiler\ResolvePathsParameter::class     => 'paths',
+		Compiler\ResolvePathsParameter::class    => 'paths',
 		StaticProxyPass::class
 	];
 
@@ -126,6 +126,7 @@ class Builder
 	public function container(): ContainerInterface
 	{
 		$this->defaultParametersResolver->param('proxies', $this->proxies);
+		$this->container->set(ResolvePathsParameter::class, $this->paths);
 
 		if ($this->container->isCompiled() === false) {
 			$this->container->compile();
