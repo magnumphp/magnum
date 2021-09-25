@@ -29,6 +29,7 @@
     }
   },
   "require": {
+    "php": "^7.2 || ^8.0",
     "dlundgren/phrender": "~0.1",
     "dlundgren/slim-turbo": "^0.4",
     "josegonzalez/dotenv": "^3.2",
