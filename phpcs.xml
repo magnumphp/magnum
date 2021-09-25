@@ -5,8 +5,9 @@
 	<config name="installed_paths" value="vendor/syberisle/coding-standards" />
 
 	<file>src</file>
-	<file>tests/unit</file>
 
+	<exclude-pattern>src/*/Tests</exclude-pattern>
+	<exclude-pattern>tests</exclude-pattern>
 
 	<rule ref="SyberIsle" />
 

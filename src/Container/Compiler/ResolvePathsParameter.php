@@ -169,14 +169,26 @@ class ResolvePathsParameter
 			throw new \InvalidArgumentException("`{$name}` is a reserved path name");
 		}
 
-		$paths              = (array)$paths;
-		$this->paths[$name] = isset($this->paths[$name]) ? array_diff($this->paths[$name], $paths) : [];
+		$paths = (array)$paths;
+		$this->removeFromArrayByKey($this->paths, $name, $paths);
 		if ($tag) {
-			$this->tags[$tag]        = isset($this->tags[$name]) ? array_diff($this->tags[$tag], $paths) : [];
-			$tagNameKey              = "{$tag}-{$name}";
-			$this->tags[$tagNameKey] = isset($this->tags[$tagNameKey]) ? array_diff($this->tags[$tagNameKey], $paths) : [];
+			$tagNameKey = "{$tag}-{$name}";
+			$this->removeFromArrayByKey($this->tags, $tag, $paths);
+			$this->removeFromArrayByKey($this->tags, $tagNameKey, $paths);
 		}
 
 		return [$paths, $tagNameKey ?? null];
+	}
+
+	/**
+	 * Removes the data from the array if it exists, or creates an empty array
+	 *
+	 * @param array  $ary The array to manage the key for
+	 * @param string $key The key in the array to diff or set
+	 * @param array  $data The data to diff
+	 */
+	protected function removeFromArrayByKey(&$ary, $key, $data)
+	{
+		$ary[$key] = isset($ary[$key]) ? array_diff($ary[$key], $data) : [];
 	}
 }
