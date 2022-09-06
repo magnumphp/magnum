@@ -35,8 +35,17 @@ class ActionRequestDecorator
 
 	public function handle(ServerRequestInterface $request): ResponseInterface
 	{
+		return $this->action->handle($this->resolveDecorator($request));
+	}
+
+	protected function resolveDecorator(ServerRequestInterface $request)
+	{
+		if (is_object($this->decorator)) {
+			return $this->decorator->setRequest($request);
+		}
+
 		$class = $this->decorator;
 
-		return $this->action->handle(new $class($request));
+		return new $class($request);
 	}
 }

@@ -61,10 +61,12 @@ class ActionRequestDecoratorPass
 			$method = $class->getMethod('run');
 			$params = $method->getParameters();
 			foreach ($params as $param) {
-				if ($param->getName() === 'request' &&
-					$param->hasType() &&
-					$param->getType() !== ServerRequestInterface::class
-				) {
+				if ($param->getName() === 'request' && $param->hasType()) {
+					$type = $param->getType();
+					if ($type instanceof \ReflectionNamedType && $type->getName() !== ServerRequestInterface::class) {
+						return $type->getName();
+					}
+
 					return (string)$param->getType();
 				}
 			}
@@ -93,6 +95,6 @@ class ActionRequestDecoratorPass
 		$container->setDefinition($decoratedClass, $outer);
 		$outer->setPublic(true);
 		$outer->setArgument(0, new Reference($innerKey));
-		$outer->setArgument(1, $requestClass);
+		$outer->setArgument(1, $container->hasDefinition($requestClass) ? new Reference($requestClass) : $requestClass);
 	}
 }

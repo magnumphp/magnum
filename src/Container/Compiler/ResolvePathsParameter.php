@@ -24,6 +24,11 @@ class ResolvePathsParameter
 	protected $paths = [];
 
 	/**
+	 * @var string Prefix for the paths arguments
+	 */
+	protected $prefix = 'paths';
+
+	/**
 	 * @var array
 	 */
 	protected $tags = [];
@@ -84,15 +89,15 @@ class ResolvePathsParameter
 			$data['tag'][$key] = $paths;
 		}
 
-		$container->setParameter('paths', $data);
-		$container->setParameter('paths.keys', $data['keys']);
-		$container->setParameter('paths.tags', $data['tags']);
+		$container->setParameter($this->prefix, $data);
+		$container->setParameter("{$this->prefix}.keys", $data['keys']);
+		$container->setParameter("{$this->prefix}.tags", $data['tags']);
 		foreach ($data['keys'] as $key) {
-			$container->setParameter("paths.{$key}", $this->paths[$key]);
+			$container->setParameter("{$this->prefix}.{$key}", $this->paths[$key]);
 		}
 
 		foreach ($data['tags'] as $key) {
-			$container->setParameter("paths.tag.{$key}", $data['tag'][$key]);
+			$container->setParameter("{$this->prefix}.tag.{$key}", $data['tag'][$key]);
 		}
 	}
 
@@ -124,6 +129,13 @@ class ResolvePathsParameter
 		list($paths, $tagNameKey) = $this->resolvePathsAndTagNameKey($value, $name, $tag);
 
 		$this->paths[$name] = $value;
+
+		return $this;
+	}
+
+	public function setPrefix(string $prefix): self
+	{
+		$this->prefix = $prefix;
 
 		return $this;
 	}
@@ -183,8 +195,8 @@ class ResolvePathsParameter
 	/**
 	 * Removes the data from the array if it exists, or creates an empty array
 	 *
-	 * @param array  $ary The array to manage the key for
-	 * @param string $key The key in the array to diff or set
+	 * @param array  $ary  The array to manage the key for
+	 * @param string $key  The key in the array to diff or set
 	 * @param array  $data The data to diff
 	 */
 	protected function removeFromArrayByKey(&$ary, $key, $data)

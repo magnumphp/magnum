@@ -21,13 +21,46 @@ class MiddlewarePass
 
 	public function process(ContainerBuilder $container)
 	{
-		$services   = $container->findTaggedServiceIds(self::TAG_NAME, true);
-		$middleware = [];
-		foreach ($services as $name => $params) {
-			$middleware[$params[0][0] ?? 0][] = $name;
-		}
-		krsort($middleware);
+		$services = $container->findTaggedServiceIds(self::TAG_NAME, true);
+		$container->setParameter(self::TAG_NAME, $this->sort($services));
+	}
 
-		$container->setParameter(self::TAG_NAME, empty($middleware) ? [] : array_merge(...$middleware));
+	protected function sort($services)
+	{
+		$after       = [];
+		$before      = [];
+		$provisional = [];
+
+		foreach ($services as $name => $params) {
+			if (isset($params[0]['after'])) {
+				$after[$params[0]['after']][] = $name;
+			}
+			elseif (isset($params[0]['before'])) {
+				$after[$params[0]['before']][] = $name;
+			}
+			else {
+				$provisional[$params[0][0] ?? 0][] = $name;
+			}
+		}
+
+		$middleware = [];
+		foreach ($provisional as $idx => $middlewares) {
+			foreach ($middlewares as $name) {
+				if (isset($after[$name])) {
+					foreach ($after[$name] as $other) {
+						$middleware[] = $other;
+					}
+				}
+
+				$middleware[] = $name;
+				if (isset($before[$name])) {
+					foreach ($before[$name] as $other) {
+						$middleware[] = $other;
+					}
+				}
+			}
+		}
+
+		return $middleware;
 	}
 }
