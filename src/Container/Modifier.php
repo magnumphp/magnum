@@ -71,14 +71,14 @@ class Modifier
 		return parent::clearTag($name);
 	}
 
-	public function addMethodCall($method, array $arguments = [])
+	public function addMethodCall(string $method, array $arguments = [], bool $returnsClone = false)
 	{
 		$this->recordChange(__METHOD__, $method, $arguments);
 
-		return parent::addMethodCall($method, $arguments);
+		return parent::addMethodCall($method, $arguments, $returnsClone);
 	}
 
-	public function removeMethodCall($method)
+	public function removeMethodCall(string $method)
 	{
 		$this->recordChange(__METHOD__, $method);
 

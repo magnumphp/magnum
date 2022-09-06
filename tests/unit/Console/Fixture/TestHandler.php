@@ -14,5 +14,6 @@ class TestHandler
 	public function run(InputInterface $input, OutputInterface $output)
 	{
 		$this->ran = true;
+		return 0;
 	}
 }

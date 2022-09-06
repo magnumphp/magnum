@@ -32,6 +32,7 @@ class ApplicationTest
 			->setHandler(
 				function () use (&$ran) {
 					$ran = true;
+					return 0;
 				}
 			);
 		$app->setAutoExit(false);

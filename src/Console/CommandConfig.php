@@ -72,7 +72,7 @@ class CommandConfig
 	 *
 	 * @param InputInterface  $input
 	 * @param OutputInterface $output
-	 * @return int|mixed|null
+	 * @return int
 	 */
 	public function execute(InputInterface $input, OutputInterface $output)
 	{

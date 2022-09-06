@@ -8,6 +8,7 @@
 namespace Magnum\Console\CommandLoader;
 
 use Magnum\Console\Application;
+use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\CommandLoader\CommandLoaderInterface;
 
 /**
@@ -35,7 +36,7 @@ class Commands
 	protected $classes = [];
 
 	/**
-	 * @var bool Whether or not the commands were loaded from a file
+	 * @var bool Whether the commands were loaded from a file
 	 */
 	protected $loaded = false;
 
@@ -78,10 +79,7 @@ class Commands
 		}
 	}
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function get($name)
+	public function get(string $name): Command
 	{
 		if (empty($this->commands[$name])) {
 			throw new \InvalidArgumentException("Command does not exist: $name");
@@ -90,18 +88,12 @@ class Commands
 		return new CommandProxy($name, $this->commands[$name]);
 	}
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function has($name)
+	public function has(string $name): bool
 	{
 		return isset($this->commands[$name]);
 	}
 
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getNames()
+	public function getNames(): array
 	{
 		return array_keys($this->commands);
 	}

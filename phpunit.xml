@@ -10,19 +10,15 @@
          stopOnFailure="true">
 	<testsuites>
 		<testsuite name="Unit">
-			<directory suffix="Test.php">./tests/unit/</directory>
-			<directory suffix="Test.php">./src/ProxyManager/Tests/</directory>
-		</testsuite>
-
-		<testsuite name="Feature">
-			<directory suffix="Test.php">./tests/feature</directory>
+			<directory suffix="Test.php">tests/unit/</directory>
+			<directory suffix="Test.php">src/ProxyManager/Tests/</directory>
 		</testsuite>
 	</testsuites>
 	<filter>
 		<whitelist processUncoveredFilesFromWhitelist="true">
-			<directory suffix=".php">./src/</directory>
+			<directory suffix=".php">src/</directory>
 			<exclude>
-				<directory>./src/ProxyManager/Tests/</directory>
+				<directory>src/ProxyManager/Tests/</directory>
 			</exclude>
 		</whitelist>
 	</filter>

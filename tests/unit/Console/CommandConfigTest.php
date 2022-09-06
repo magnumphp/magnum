@@ -43,6 +43,7 @@ class CommandConfigTest
 		$cc->setHandler(
 			function () use (&$ran) {
 				$ran = true;
+				return 0;
 			}
 		);
 

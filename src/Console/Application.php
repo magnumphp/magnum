@@ -65,7 +65,7 @@ class Application
 	 * @param Command         $command
 	 * @param InputInterface  $input
 	 * @param OutputInterface $output
-	 * @return int|void
+	 * @return int
 	 * @throws \Exception
 	 * @throws \Throwable
 	 */
@@ -73,12 +73,12 @@ class Application
 	{
 		if ($command instanceof CommandConfig) {
 			$handler = $command->getHandler();
-			if (is_string($handler) && $this->container) {
+			if (is_string($handler)) {
 				$command->setHandler($this->container->get($handler));
 			}
 		}
 
-		parent::doRunCommand($command, $input, $output);
+		return parent::doRunCommand($command, $input, $output);
 	}
 
 	/**
