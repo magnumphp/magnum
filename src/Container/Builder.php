@@ -21,6 +21,7 @@ use Symfony\Component\DependencyInjection\Dumper\PhpDumper;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\Finder\Finder;
+use Webmozart\Assert\Assert;
 
 /**
  * Builder for Symfony's Dependency Injection container
@@ -176,7 +177,7 @@ class Builder
 	}
 
 	/**
-	 * Register an proxy with the system
+	 * Register a proxy with the system
 	 *
 	 * @param      $alias
 	 * @param      $className
@@ -204,15 +205,22 @@ class Builder
 	/**
 	 * Creates a Factory definition in the container
 	 *
-	 * @param string $id     The factory identifier
-	 * @param string $class  The class name
-	 * @param string $method The method to call on the class
+	 * @param string           $id     The factory identifier
+	 * @param string|Reference $class  The class name
+	 * @param string           $method The method to call on the class
 	 *
 	 * @return Definition
 	 */
-	public function factory(string $id, string $class, string $method): Definition
+	public function factory(string $id, $class, string $method): Definition
 	{
-		$definition = (new Definition($class))
+		if (!is_string($class)) {
+			Assert::isInstanceOf($class, Reference::class);
+		}
+		elseif ($class[0] === '@') {
+			$class = new Reference(substr($class, 1));
+		}
+
+		$definition = (new Definition(is_string($class) ? $class : null))
 			->setFactory(
 				[
 					$class,
@@ -292,7 +300,7 @@ class Builder
 	}
 
 	/**
-	 * Returns whether or not the parameter exists
+	 * Returns whether the parameter exists
 	 *
 	 * @param string $id
 	 *
@@ -421,7 +429,7 @@ class Builder
 	/**
 	 * Convenience function to register a class as a singleton (shared instance)
 	 *
-	 * @param string $id    The factory identifier
+	 * @param string $id    The singleton identifier
 	 * @param string $class The class name
 	 *
 	 * @return Definition

@@ -12,6 +12,7 @@ use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Reference;
+use Webmozart\Assert\InvalidArgumentException;
 
 class BuilderTest
 	extends TestCase
@@ -62,6 +63,26 @@ class BuilderTest
 		$this->builder->factory('fact', ConstructorA::class, 'test');
 
 		self::assertTrue($this->builder->builder()->hasDefinition('fact'));
+	}
+
+	public function testFactoryAcceptReference()
+	{
+		$this->builder->factory('fact', new Reference(ConstructorA::class), 'test');
+
+		self::assertTrue($this->builder->builder()->hasDefinition('fact'));
+	}
+
+	public function testFactoryDoesNotAcceptOtherObjects()
+	{
+		$this->expectException(InvalidArgumentException::class);
+		$this->builder->factory('fact', new ConstructorA(), 'test');
+	}
+
+	public function testFactoryCreatesReferenceFromString()
+	{
+		$this->builder->factory('fact', '@' . ConstructorA::class, 'test');
+
+		self::assertInstanceOf(Reference::class, $this->builder->get('fact')->getFactory()[0]);
 	}
 
 	public function testSaveToFile()
