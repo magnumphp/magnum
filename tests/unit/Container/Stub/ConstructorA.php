@@ -5,6 +5,7 @@ namespace Magnum\Container\Stub;
 class ConstructorA
 {
 	public $modified = false;
+	public $a;
 
 	public static function test()
 	{

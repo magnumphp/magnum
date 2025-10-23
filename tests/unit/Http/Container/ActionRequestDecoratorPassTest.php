@@ -20,7 +20,7 @@ class ActionRequestDecoratorPassTest
 
 		$obj = $builder->container()->get(InterfaceRequestDecorator::class);
 		self::assertInstanceOf(ActionRequestDecorator::class, $obj);
-		self::assertObjectHasAttribute('decorator', $obj);
+		self::assertObjectHasProperty('decorator', $obj);
 	}
 
 	public function testProcessReadDocComment()
@@ -31,7 +31,7 @@ class ActionRequestDecoratorPassTest
 
 		$obj = $builder->container()->get(CommentedRequestDecorator::class);
 		self::assertInstanceOf(ActionRequestDecorator::class, $obj);
-		self::assertObjectHasAttribute('decorator', $obj);
+		self::assertObjectHasProperty('decorator', $obj);
 	}
 
 	public function testProcessIgnoresAction()

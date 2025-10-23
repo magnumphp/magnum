@@ -2,6 +2,7 @@
 
 namespace Magnum\Output\Render;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 
 class MutableContextTest
@@ -15,7 +16,7 @@ class MutableContextTest
 		self::assertEquals($payload, $mc->provide('test'));
 	}
 
-	public function provideGetValues()
+	public static function provideGetValues()
 	{
 		return [
 			['context', ['test' => 'context']],
@@ -24,9 +25,7 @@ class MutableContextTest
 		];
 	}
 
-	/**
-	 * @dataProvider provideGetValues
-	 */
+	#[DataProvider('provideGetValues')]
 	public function testGet($expected, $payload, $alt = null)
 	{
 		$mc = new MutableContext($payload);

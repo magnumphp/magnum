@@ -52,8 +52,9 @@ class RoutingTest
 				->willReturn($this->createMock(ResponseInterface::class));
 		$mw->process($request, $handler);
 
-		self::assertArrayHasKey(Routing::ATTRIBUTE, $request->attrs);
-		self::assertArrayHasKey(Routing::RESULT_ATTRIBUTE, $request->attrs);
+		$attrs = $request->getAttributes();
+		self::assertArrayHasKey(Routing::ATTRIBUTE, $attrs);
+		self::assertArrayHasKey(Routing::RESULT_ATTRIBUTE, $attrs);
 	}
 
 	public function testFailureReturns404ResponseWithoutHandler()
@@ -80,7 +81,7 @@ class RoutingTest
 
 		/** @var ResponseInterface $r */
 		$r      = $mw->process($request, $handler);
-		$result = $request->attrs[Routing::RESULT_ATTRIBUTE];
+		$result = $request->getAttribute(Routing::RESULT_ATTRIBUTE);
 
 		self::assertInstanceOf(ResponseInterface::class, $r);
 		self::assertEquals(405, $r->getStatusCode());

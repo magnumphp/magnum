@@ -22,7 +22,6 @@ class ActionRequestDecoratorTest
 
 	public function testHandleDecorates()
 	{
-
 		$action = new class {
 			public $called = false;
 			public $request = null;

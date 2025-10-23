@@ -7,9 +7,9 @@
 
 namespace Magnum\Http\Message\ServerRequest;
 
+use Laminas\Diactoros\Stream;
 use function Laminas\Diactoros\parseCookieHeader;
 use function Laminas\Diactoros\normalizeUploadedFiles;
-use Laminas\Diactoros\PhpInputStream;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\StreamInterface;
 
@@ -21,7 +21,7 @@ class DiactorosFactory
 	 */
 	public function buildBodyStream(): StreamInterface
 	{
-		return new PhpInputStream();
+		return new Stream('php://input', 'r');
 	}
 
 	/**

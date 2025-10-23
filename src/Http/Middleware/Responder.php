@@ -36,18 +36,18 @@ class Responder
 	 */
 	protected $streamFactory;
 
-	public function __construct(ResponseEmitter $responseEmitter = null)
+	public function __construct(?ResponseEmitter $responseEmitter = null)
 	{
 		$this->responseEmitter = $responseEmitter ?? new ResponseEmitter;
 	}
 
-	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler = null): ResponseInterface
+	public function process(ServerRequestInterface $request, ?RequestHandlerInterface $handler = null): ResponseInterface
 	{
 		$response = $handler
 			? $handler->handle($request)
 			: $this->createResponse(500);
 
-		if (strtoupper($request->getMethod()) === 'HEAD') {
+		if (strtoupper($request->getMethod() ?? 'GET') === 'HEAD') {
 			$response = $response->withBody($this->createEmptyStream());
 		}
 

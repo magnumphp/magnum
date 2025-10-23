@@ -2,14 +2,14 @@
 
 namespace Magnum\Http\Message\ServerRequest;
 
-use Laminas\Diactoros\PhpInputStream;
+use Laminas\Diactoros\Stream;
 use Middlewares\Utils\Factory as MiddlewareFactory;
 use Middlewares\Utils\FactoryDiscovery;
 
 class DiactorosFactoryTest
 	extends FactoryTestCase
 {
-	protected $bodyClass = PhpInputStream::class;
+	protected $bodyClass = Stream::class;
 
 	public function setUp(): void
 	{

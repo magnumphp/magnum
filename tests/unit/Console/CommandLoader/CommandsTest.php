@@ -11,6 +11,7 @@ use Symfony\Component\DependencyInjection\Container;
 class CommandsTest
 	extends TestCase
 {
+	protected $app;
 	protected $vfs;
 	/**
 	 * @var Commands

@@ -75,7 +75,7 @@ abstract class AbstractFactory
 	{
 		$request = $this->factory->createServerRequest(
 			$this->server['REQUEST_METHOD'] ?? 'GET',
-			Http::createFromServer($this->server),
+			Http::fromServer($this->server),
 			$this->server
 		);
 

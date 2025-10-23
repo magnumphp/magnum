@@ -65,6 +65,7 @@ class ApplicationTest
 	{
 		// set up a basic container
 		$container = new ContainerBuilder();
+		$container->setAlias(ContainerInterface::class, 'service_container');
 		$container->addCompilerPass(new ConsoleCommandPass());
 		$container->register(TestCommand::class)->addTag(ConsoleCommandPass::TAG_NAME);
 		$container->register(Commands::class)->setPublic(true);

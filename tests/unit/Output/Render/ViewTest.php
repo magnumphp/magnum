@@ -2,6 +2,7 @@
 
 namespace Magnum\Output\Render;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Phrender\Template\Factory;
 
@@ -9,10 +10,10 @@ class ViewTest
 	extends TestCase
 {
 	protected $escaper;
+
 	public function setUp(): void
 	{
-		$this->escaper = new class()
-		{
+		$this->escaper = new class() {
 			public function escape($str)
 			{
 				return "%{$str}%";
@@ -20,7 +21,7 @@ class ViewTest
 		};
 	}
 
-	public function provideInvalidFileNames()
+	public static function provideInvalidFileNames()
 	{
 		return [
 			[''],
@@ -56,8 +57,10 @@ class ViewTest
 
 	public function testRawReturnsValue()
 	{
-		$view = new class($sut = new \stdClass()) extends View {
-			public function __construct($sut) {
+		$view = new class($sut = new \stdClass())
+			extends View {
+			public function __construct($sut)
+			{
 				$this->data = [
 					'var' => $sut
 				];
@@ -75,9 +78,7 @@ class ViewTest
 		self::assertEquals('test', $view->render(new MutableContext(['var' => 'test'])));
 	}
 
-	/**
-	 * @dataProvider provideInvalidFileNames
-	 */
+	#[DataProvider('provideInvalidFileNames')]
 	public function testFileIsRequiredInConstructor($filename)
 	{
 		$this->expectException(\InvalidArgumentException::class);

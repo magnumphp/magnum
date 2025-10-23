@@ -36,7 +36,7 @@ class ViewContext
 	 *
 	 * {@inheritdoc}
 	 */
-	public function provide($template)
+	public function provide($template): array
 	{
 		$data = parent::provide($template);
 
@@ -50,7 +50,7 @@ class ViewContext
 	 *
 	 * @param Context $context
 	 */
-	public function add(Context $context)
+	public function add(Context $context): void
 	{
 		$this->depth++;
 		parent::add($context);
@@ -61,7 +61,7 @@ class ViewContext
 	 *
 	 * @param Context $context
 	 */
-	public function remove(Context $context)
+	public function remove(Context $context): void
 	{
 		if (isset($this->data[$this->depth])) {
 			unset($this->data[$this->depth]);
@@ -86,7 +86,7 @@ class ViewContext
 	/**
 	 * {@inheritdoc}
 	 */
-	public function offsetExists($offset)
+	public function offsetExists(mixed $offset): bool
 	{
 		$depth = $this->depth;
 		do {
@@ -101,7 +101,7 @@ class ViewContext
 	/**
 	 * {@inheritdoc}
 	 */
-	public function offsetGet($offset)
+	public function offsetGet(mixed $offset): mixed
 	{
 		$depth = $this->depth;
 		do {
@@ -116,7 +116,7 @@ class ViewContext
 	/**
 	 * {@inheritdoc}
 	 */
-	public function offsetSet($offset, $value)
+	public function offsetSet(mixed $offset, mixed $value): void
 	{
 		// do nothing
 	}
@@ -124,7 +124,7 @@ class ViewContext
 	/**
 	 * {@inheritdoc}
 	 */
-	public function offsetUnset($offset)
+	public function offsetUnset(mixed $offset): void
 	{
 		// do nothing
 	}

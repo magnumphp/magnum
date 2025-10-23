@@ -22,112 +22,112 @@ class Modifier
 	 */
 	protected $extraChanges = [];
 
-	public function setArguments(array $arguments)
+	public function setArguments(array $arguments): static
 	{
 		$this->recordChange(__METHOD__, $arguments);
 
 		return parent::setArguments($arguments);
 	}
 
-	public function setArgument($key, $value)
+	public function setArgument($key, $value): static
 	{
 		$this->recordChange(__METHOD__, $key, $value);
 
 		return parent::setArgument($key, $value);
 	}
 
-	public function addArgument($argument)
+	public function addArgument($argument): static
 	{
 		$this->recordChange(__METHOD__, $argument);
 
 		return parent::addArgument($argument);
 	}
 
-	public function replaceArgument($index, $argument)
+	public function replaceArgument($index, $argument): static
 	{
 		$this->recordChange(__METHOD__, $index, $argument);
 
 		return parent::replaceArgument($index, $argument);
 	}
 
-	public function setTags(array $tags)
+	public function setTags(array $tags): static
 	{
 		$this->recordChange(__METHOD__, $tags);
 
 		return parent::setTags($tags);
 	}
 
-	public function addTag($name, array $attributes = [])
+	public function addTag($name, array $attributes = []): static
 	{
 		$this->recordChange(__METHOD__, $name, $attributes);
 
 		return parent::addTag($name, $attributes);
 	}
 
-	public function clearTag($name)
+	public function clearTag($name): static
 	{
 		$this->recordChange(__METHOD__, $name);
 
 		return parent::clearTag($name);
 	}
 
-	public function addMethodCall(string $method, array $arguments = [], bool $returnsClone = false)
+	public function addMethodCall(string $method, array $arguments = [], bool $returnsClone = false): static
 	{
 		$this->recordChange(__METHOD__, $method, $arguments);
 
 		return parent::addMethodCall($method, $arguments, $returnsClone);
 	}
 
-	public function removeMethodCall(string $method)
+	public function removeMethodCall(string $method): static
 	{
 		$this->recordChange(__METHOD__, $method);
 
 		return parent::removeMethodCall($method);
 	}
 
-	public function setProperties($values)
+	public function setProperties($values): static
 	{
 		$this->recordChange(__METHOD__, $values);
 
 		return parent::setProperties($values);
 	}
 
-	public function setProperty($name, $value)
+	public function setProperty($name, $value): static
 	{
 		$this->recordChange(__METHOD__, $name, $value);
 
 		return parent::setProperty($name, $value);
 	}
 
-	public function setAbstract($boolean)
+	public function setAbstract($boolean): static
 	{
 		$this->recordChange(__METHOD__, $boolean);
 
 		return parent::setAbstract($boolean);
 	}
 
-	public function setSynthetic($boolean)
+	public function setSynthetic($boolean): static
 	{
 		$this->recordChange(__METHOD__, $boolean);
 
 		return parent::setSynthetic($boolean);
 	}
 
-	public function setInstanceofConditionals(array $instanceof)
+	public function setInstanceofConditionals(array $instanceof): static
 	{
 		$this->recordChange(__METHOD__, $instanceof);
 
 		return parent::setInstanceofConditionals($instanceof);
 	}
 
-	public function setDeprecated($status = true, $template = null)
+	public function setDeprecated(string $package, string $version, string $message): static
 	{
-		$this->recordChange(__METHOD__, $status, $template);
+		$this->recordChange(__METHOD__, $package, $version, $message);
 
-		return parent::setDeprecated($status, $template);
+		return parent::setDeprecated($package, $version, $message);
 	}
 
-	public function setBindings(array $bindings)
+	public function setBindings(array $bindings): static
 	{
 		$this->recordChange(__METHOD__, $bindings);
 

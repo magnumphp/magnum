@@ -28,7 +28,7 @@ class Manager
 	 * @param ContainerInterface   $container   Container that holds the actual instances
 	 * @param AliasLoaderInterface $aliasLoader Alias Loader object that stores and resolves
 	 */
-	public function __construct(ContainerInterface $container, AliasLoaderInterface $aliasLoader = null)
+	public function __construct(ContainerInterface $container, ?AliasLoaderInterface $aliasLoader = null)
 	{
 		parent::__construct($container, $this->ourAliasLoader = $aliasLoader ?? new AliasLoader());
 
@@ -65,7 +65,7 @@ class Manager
 	 */
 	public static function factory(
 		ContainerInterface $container,
-		AliasLoaderInterface $aliasLoader = null,
+		?AliasLoaderInterface $aliasLoader = null,
 		array $proxies = []
 	) {
 		$instance = new self($container, $aliasLoader);

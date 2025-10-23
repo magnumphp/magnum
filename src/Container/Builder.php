@@ -12,7 +12,9 @@ use Magnum\Container\Compiler\ResolvePathsParameter;
 use Magnum\Container\Compiler\StaticProxyPass;
 use Magnum\ProxyManager\Manager;
 use Psr\Container\ContainerInterface;
-use SyberIsle\FileReflection\ReflectionFile;
+use Roave\BetterReflection\BetterReflection;
+use Roave\BetterReflection\Reflector\DefaultReflector;
+use Roave\BetterReflection\SourceLocator\Type\DirectoriesSourceLocator;
 use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Compiler\PassConfig;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -244,26 +246,15 @@ class Builder
 	 */
 	public function findClassesInPath($path): array
 	{
-		$files   = $this->resolveFinder()->files()->in($path)->name('*.php');
-		$classes = [];
-
-		foreach ($files as $file) {
-			try {
-				$file = new ReflectionFile($file->getRealpath());
-				foreach ($file->getClasses() as $class) {
-					/** @var \ReflectionClass $class */
-
-					if ($class->isAbstract() || $class->isInterface() || $class->isTrait()) {
-						// Don't load these as they can't be instantiated
-						continue;
-					}
-
-					$classes[] = $class->getName();
-				}
-			}
-			catch (\ReflectionException $e) {
+		$astLocator               = (new BetterReflection())->astLocator();
+		$directoriesSourceLocator = new DirectoriesSourceLocator([$path], $astLocator);
+		$reflector                = new DefaultReflector($directoriesSourceLocator);
+		$classes                  = [];
+		foreach ($reflector->reflectAllClasses() as $class) {
+			if ($class->isAbstract() || $class->isInterface() || $class->isTrait()) {
 				continue;
 			}
+			$classes[] = $class->getName();
 		}
 
 		return $classes;
@@ -291,7 +282,7 @@ class Builder
 	 *
 	 * @return Definition
 	 */
-	public function instance(string $id, string $class = null): Definition
+	public function instance(string $id, ?string $class = null): Definition
 	{
 		return $this->container
 			->autowire($id, $class ?? $id)
@@ -380,7 +371,7 @@ class Builder
 	 *
 	 * @return Definition
 	 */
-	public function register(string $id, string $class = null): Definition
+	public function register(string $id, ?string $class = null): Definition
 	{
 		return $this->container
 			->autowire($id, $class ?? $id)
@@ -434,7 +425,7 @@ class Builder
 	 *
 	 * @return Definition
 	 */
-	public function singleton(string $id, string $class = null): Definition
+	public function singleton(string $id, ?string $class = null): Definition
 	{
 		return $this->register($id, $class ?? $id);
 	}
@@ -552,7 +543,10 @@ class Builder
 	 */
 	protected function resolveContainerBuilder(?ParameterBagInterface $parameterBag): ContainerBuilder
 	{
-		return new ContainerBuilder($parameterBag);
+		$builder = new ContainerBuilder($parameterBag);
+		$builder->setAlias(ContainerInterface::class, 'service_container');
+
+		return $builder;
 	}
 
 	/**

@@ -64,7 +64,7 @@ class TwoStage
 	 * @param null $data
 	 * @return string
 	 */
-	public function render($template, $data = null)
+	public function render($template, $data = null): string
 	{
 		$this->depth++;
 
@@ -106,7 +106,7 @@ class TwoStage
 	 * @param $template
 	 * @return \Interop\Output\Template
 	 */
-	protected function loadTemplate($template)
+	protected function loadTemplate($template): \Interop\Output\Template
 	{
 		return $this->factory->load($template, $this);
 	}

@@ -40,7 +40,7 @@ class TemplateFactory
 	/**
 	 * {@inheritdoc}
 	 */
-	public function load($template)
+	public function load($template): Template
 	{
 		if ($template[0] === '/' && file_exists($template)) {
 			return $this->create($template);

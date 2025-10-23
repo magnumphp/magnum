@@ -2,10 +2,12 @@
 
 namespace Magnum\Http;
 
+use Magnum\Http\Message\ServerRequest;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\ServerRequestInterface;
 use Psr\Http\Message\UriInterface;
 use Psr\Http\Server\RequestHandlerInterface;
+use Slim\Psr7\Factory\ServerRequestFactory;
 
 class TestCase
 	extends \PHPUnit\Framework\TestCase
@@ -47,29 +49,39 @@ class TestCase
 	/**
 	 * Builds a request uri mock object
 	 *
+	 * This is more static than a real request, but works out to let the request be updated through any handler mocks
+	 * and being able to test that the attributes are set.
+	 *
 	 * @param $method
 	 * @param $path
 	 * @return \PHPUnit\Framework\MockObject\MockObject
 	 */
 	public function buildRequest($method, $path): ServerRequestInterface
 	{
+//		$request = (new ServerRequestFactory())->createServerRequest($method, "https://example.com/{$path}", ['host']);
+
 		$request = $this->createMock(ServerRequestInterface::class);
 		$uri     = $this->createMock(UriInterface::class);
 
 		$uri->method('getPath')->willReturn($path);
-		$request->attrs = [];
 		$request->method('getUri')->willReturn($uri);
 		$request->method('getMethod')->willReturn($method);
 
+		$attrs = [];
+		$request->method('getAttributes')->willReturnCallback(
+			function () use (&$attrs) {
+				return $attrs;
+			}
+		);
 		$request->method('getAttribute')->willReturnCallback(
-			function ($name) use (&$request) {
-				return $request->attrs[$name] ?? null;
+			function ($name) use (&$attrs) {
+				return $attrs[$name] ?? null;
 			}
 		);
 
 		$request->method('withAttribute')->willReturnCallback(
-			function ($name, $value) use (&$request) {
-				$request->attrs[$name] = $value;
+			function ($name, $value) use (&$request, &$attrs) {
+				$attrs[$name] = $value;
 
 				return $request;
 			}

@@ -56,7 +56,7 @@ class MutableContext
 	 *
 	 * {@inheritdoc}
 	 */
-	public function accepts($template)
+	public function accepts($template): bool
 	{
 		return true;
 	}
@@ -64,7 +64,7 @@ class MutableContext
 	/**
 	 * {@inheritdoc}
 	 */
-	public function provide($template)
+	public function provide($template): array
 	{
 		return $this->data;
 	}

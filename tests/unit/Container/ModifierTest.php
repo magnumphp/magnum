@@ -2,6 +2,7 @@
 
 namespace Magnum\Container;
 
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Argument\BoundArgument;
 use Symfony\Component\DependencyInjection\Definition;
@@ -25,7 +26,7 @@ class ModifierTest
 		$this->definition = new Definition('test');
 	}
 
-	public function provideMultiTests()
+	public static function provideMultiTests()
 	{
 		return [
 			// arguments
@@ -51,7 +52,7 @@ class ModifierTest
 			['setFile', ['testit'], 'getFile', null, 'testit'],
 
 			// multi-boolean
-			['setDeprecated', [], 'isDeprecated', null, true],
+			['setDeprecated', ['test', '0.1', '%service_id%'], 'isDeprecated', null, true],
 
 			// booleans
 			['setAutoconfigured', [true], 'isAutoconfigured', null, true],
@@ -63,9 +64,7 @@ class ModifierTest
 		];
 	}
 
-	/**
-	 * @dataProvider provideMultiTests
-	 */
+	#[DataProvider('provideMultiTests')]
 	public function testMultiMethods($setter, $args, $getter, $value, $expected)
 	{
 		$this->modifier->$setter(...$args);

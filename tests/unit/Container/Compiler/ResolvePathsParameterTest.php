@@ -3,13 +3,14 @@
 namespace Magnum\Container\Compiler;
 
 use Magnum\Container\Stub\ConstructorA;
+use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 
 class ResolvePathsParameterTest
 	extends TestCase
 {
-	public function provideReservedNames()
+	public static function provideReservedNames()
 	{
 		return [
 			['keys'],
@@ -18,9 +19,7 @@ class ResolvePathsParameterTest
 		];
 	}
 
-	/**
-	 * @dataProvider provideReservedNames
-	 */
+	#[DataProvider('provideReservedNames')]
 	public function testThrowsExceptionOnReservedNames($key)
 	{
 		$this->expectException(\InvalidArgumentException::class);

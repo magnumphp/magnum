@@ -12,12 +12,11 @@ class TrackingMiddleware
 {
 	public $seen = false;
 
-	public function __construct($response)
+	public function __construct(public $response)
 	{
-		$this->response = $response;
 	}
 
-	public function process(ServerRequestInterface $request, RequestHandlerInterface $handler = null): ResponseInterface
+	public function process(ServerRequestInterface $request, ?RequestHandlerInterface $handler = null): ResponseInterface
 	{
 		$this->seen = true;
 		if ($handler) {

@@ -24,7 +24,7 @@ class CompiledServiceContainer
 	/**
 	 * {@inheritDoc}
 	 */
-	public function __construct(ParameterBagInterface $parameterBag = null)
+	public function __construct(?ParameterBagInterface $parameterBag = null)
 	{
 		parent::__construct($parameterBag);
 

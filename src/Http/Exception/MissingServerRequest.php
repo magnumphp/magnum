@@ -13,7 +13,7 @@ use Throwable;
 class MissingServerRequest
 	extends \InvalidArgumentException
 {
-	public function __construct($message = "", $code = 0, Throwable $previous = null)
+	public function __construct($message = "", $code = 0, ?Throwable $previous = null)
 	{
 		parent::__construct("A " . ServerRequestInterface::class . ' object is required.', $code, $previous);
 	}

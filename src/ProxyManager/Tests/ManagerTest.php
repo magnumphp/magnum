@@ -2,7 +2,6 @@
 
 namespace Magnum\ProxyManager\Tests;
 
-use Magnum\Fixture\Middleware\Test;
 use Magnum\ProxyManager\Manager;
 use Magnum\ProxyManager\Proxy;
 use Magnum\ProxyManager\StaticProxy;
@@ -10,15 +9,18 @@ use Magnum\ProxyManager\Tests\Fixture\AliasLoader;
 use Magnum\ProxyManager\Tests\Fixture\ProxyClass;
 use Magnum\ProxyManager\Tests\Fixture\TestProxy;
 use PHPUnit\Framework\TestCase;
-use Symfony\Component\DependencyInjection\Alias;
 use Symfony\Component\DependencyInjection\Container;
 
 class ManagerTest
 	extends TestCase
 {
+	protected Manager $manager;
+	protected Container $container;
+	protected AliasLoader $aliasLoader;
+
 	public function setUp(): void
 	{
-		// remove ALL of the alias loaders
+		// remove ALL the alias loaders
 		foreach (spl_autoload_functions() as $autoload) {
 			if ($autoload instanceof \ReStatic\AliasLoader || (is_array($autoload) && $autoload[0] instanceof \ReStatic\AliasLoader)) {
 				spl_autoload_unregister($autoload);
@@ -67,11 +69,10 @@ class ManagerTest
 	{
 		$al = $this->createMock(\ReStatic\AliasLoader::class);
 		$al->method('isRegistered')
-		   ->will(
-			   $this->returnValueMap(
+		   ->willReturnMap([
 				   [false],
 				   [true]
-			   ));
+			   ]);
 		self::assertTrue($this->manager->enable());
 	}
 

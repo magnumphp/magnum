@@ -66,8 +66,6 @@ class ActionRequestDecoratorPass
 					if ($type instanceof \ReflectionNamedType && $type->getName() !== ServerRequestInterface::class) {
 						return $type->getName();
 					}
-
-					return (string)$param->getType();
 				}
 			}
 		}

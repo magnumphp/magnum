@@ -8,13 +8,18 @@
 namespace Magnum\Output\Render;
 
 use Interop\Output\Context as InteropContext;
-use Interop\Output\TemplateFactory;
+use Phrender\Template\Factory;
 use Phrender\Template\Template;
 
 class View
 	extends Template
 {
-	public function __construct($file, TemplateFactory $factory)
+	/**
+	 * NB: this should probably be protected and set via the factory
+	 */
+	public $escaper;
+
+	public function __construct($file, Factory $factory)
 	{
 		if (empty($file)) {
 			throw new \InvalidArgumentException("A file is required");
@@ -62,9 +67,9 @@ class View
 	 * @param InteropContext $context
 	 * @return string The rendered output
 	 */
-	public function render(InteropContext $context)
+	public function render(InteropContext $context): string
 	{
-		$this->data = $context->provide($this->file());
+		$this->data = $context->provide($file = $this->name());
 
 		if ($this->data) {
 			// we need to map the escaper
@@ -73,7 +78,7 @@ class View
 
 		ob_start();
 
-		require $this->file();
+		require $file;
 
 		$content = ob_get_clean();
 

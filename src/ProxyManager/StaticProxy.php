@@ -17,6 +17,8 @@ use ReStatic\StaticProxy as ReStaticProxy;
 abstract class StaticProxy
 	extends ReStaticProxy
 {
+	private static array $instances = [];
+
 	/**
 	 * Sets the Container that will be used to retrieve the Proxy Subject
 	 *
@@ -42,12 +44,12 @@ abstract class StaticProxy
 	 */
 	public static function instance($instance = null, $clear = false)
 	{
-		static $_instance;
+		$id = static::getInstanceIdentifier();
 
-		if ($_instance && !$clear) {
-			return $_instance;
+		if (isset(static::$instances[$id]) && !$clear) {
+			return static::$instances[$id];
 		}
 
-		return $_instance = $clear ? null : ($instance ?? parent::getInstance());
+		return static::$instances[$id] = $clear ? null : ($instance ?? parent::getInstance());
 	}
 }

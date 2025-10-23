@@ -4,12 +4,16 @@ namespace Magnum\ProxyManager\Tests;
 
 use Magnum\ProxyManager\Manager;
 use Magnum\ProxyManager\Proxy;
+use Magnum\ProxyManager\Tests\Fixture\AliasLoader;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\Container;
 
 class ProxyTest
 	extends TestCase
 {
+	protected Manager $manager;
+	protected Container $container;
+
 	public function setUp(): void
 	{
 		$this->manager = new Manager(

@@ -1,7 +1,6 @@
 parameters:
   excludePaths:
     - tests/
-  checkMissingIterableValueType: false
   level: max
   ignoreErrors:
     - '#Unsafe usage of new static#'
