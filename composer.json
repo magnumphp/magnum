@@ -61,6 +61,7 @@
   },
   "scripts": {
     "test": "@php vendor/bin/phpunit --colors=always",
+    "test-clover": "@php vendor/bin/phpunit --coverage-clover=build/coverage/clover.xml",
     "test-coverage": "@php vendor/bin/phpunit --colors=always --coverage-html=build/coverage",
     "sniff": "@php vendor/bin/phpcs",
     "format": "@php vendor/bin/phpcbf",
